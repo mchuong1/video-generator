@@ -12,6 +12,10 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.17.0",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.8.2",
+    "@mui/styles": "^5.8.0",
     "@remotion/bundler": "^3.0.0",
     "@remotion/cli": "^3.0.0",
     "@remotion/eslint-config": "^3.0.0",
@@ -20,6 +24,7 @@
     "md5": "^2.3.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.17.0",
     "prettier": "^2.6.2",
+    "prop-types": "^15.8.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "remotion": "^3.0.0",
