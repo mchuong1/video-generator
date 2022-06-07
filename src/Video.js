@@ -1,7 +1,10 @@
-import {Composition} from 'remotion';
+import {Composition, getInputProps} from 'remotion';
 import CityVideo from './Components/CityVideo';
 
 export const RemotionVideo = () => {
+
+	const props = getInputProps();
+	const { postId } = props;
 
 	return (
 		<>
@@ -13,8 +16,7 @@ export const RemotionVideo = () => {
 				width={1080}
 				height={1920}
 				defaultProps={{
-					titleText: 'Working with TTS (Azure + AWS S3)',
-					titleColor: 'black',
+					postId: 'f08dxb'
 				}}
 			/>
 		</>
