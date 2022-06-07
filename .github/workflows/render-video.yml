@@ -32,6 +32,10 @@ jobs:
                   REMOTION_AWS_S3_REGION: ${{secrets.REMOTION_AWS_S3_REGION}}
                   REMOTION_AWS_ACCESS_KEY_ID: ${{secrets.REMOTION_AWS_ACCESS_KEY_ID}}
                   REMOTION_AWS_SECRET_ACCESS_KEY: ${{secrets.REMOTION_AWS_SECRET_ACCESS_KEY}}
+                  REMOTION_CLIENT_ID: ${{secrets.REMOTION_CLIENT_ID}}
+                  REMOTION_CLIENT_SECRET: ${{secrets.REMOTION_CLIENT_SECRET}}
+                  REMOTION_REDDIT_USERNAME: ${{secrets.REMOTION_REDDIT_USERNAME}}
+                  REMOTION_REDDIT_PASSWORD: ${{secrets.REMOTION_REDDIT_PASSWORD}}
             - uses: actions/upload-artifact@v2
               with:
                   name: out.mp4
