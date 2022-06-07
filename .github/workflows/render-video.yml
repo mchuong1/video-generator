@@ -6,7 +6,7 @@ on:
                 description: "Put postId here"
                 required: true
                 default: "uzm67c"
-            titleColor:
+            commentIds:
                 description: "Put CommentIds here seperated by a comma"
                 required: true
                 default: "iab62k6,iab0moh,iab2w5s,iab1ebo,iab8y9f"

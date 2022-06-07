@@ -9,9 +9,7 @@ import { getAudioDurationInSeconds } from '@remotion/media-utils';
 export const RemotionVideo = () => {
 
 	const props = getInputProps();
-	const { postId, comments } = props;
-	const mockComments = "iab62k6,iab0moh,iab2w5s,iab1ebo,iab8y9f"
-	const mockPostId = "uzm67c"
+	const { postId, commentIds } = props;
 
 	const [handle] = useState(() => delayRender());
   const [duration, setDuration] = useState(1);
@@ -25,12 +23,12 @@ export const RemotionVideo = () => {
   }, []);
 	
 	const fetchData = useCallback(async () => {
-		const post = await getRedditPost(mockPostId);
+		const post = await getRedditPost(postId);
     const { title } = post;
     const fileName = await textToSpeech(title, 'enUSWoman1');
     const duration = await getAudioDurationInSeconds(fileName);
 
-    const comments = _.map(mockComments.split(','), id => findComment(id, post.comments));
+    const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
     const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(comment.body, 'enUSWoman1')));
     const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
 
@@ -38,7 +36,7 @@ export const RemotionVideo = () => {
     setCommentAudioDurations(commentAudioDurations);
 
 		continueRender(handle);
-	}, [handle, mockPostId, mockComments, findComment]);
+	}, [handle, postId, commentIds, findComment]);
 
 	useEffect(() => {
 		fetchData();
@@ -54,8 +52,8 @@ export const RemotionVideo = () => {
 				width={1080}
 				height={1920}
 				defaultProps={{
-					postId: mockPostId,
-					commentIds: mockComments,
+					postId,
+					commentIds,
 				}}
 			/>
 		</>
