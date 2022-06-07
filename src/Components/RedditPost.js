@@ -16,11 +16,12 @@ const useStyles = makeStyles(() => ({
     textAlign: 'start',
     zIndex: 5,
     position: 'absolute',
-    top: '48rem'
+    top: '48rem',
+    width: '1080px'
   },
   communityIcon: {
     borderRadius: '50%',
-    height: '30px',
+    height: '60px',
     marginRight: '5px'
   },
   progress: {
@@ -31,26 +32,27 @@ const useStyles = makeStyles(() => ({
   },
   title: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '20px',
-    lineHeight: '24px',
+    fontSize: '40px',
+    lineHeight: '48px',
     fontWeight: '500',
     marginBottom: '5px'
   },
   awardsbar: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '12px',
-    lineHeight: '16px',
+    fontSize: '24px',
+    lineHeight: '32px',
     fontWeight: 400,
     color: '#818384',
     display: 'flex',
     marginBottom: '24px',
     backgroundColor: '#272729',
     padding: '10px',
-    width: 'fit-content'
+    width: '900',
+    flexWrap: 'wrap'
   },
   award: {
     marginRight: '5px',
-    width: '16px'
+    width: '32px'
   },
   awardcount: {
     marginRight: '5px'
@@ -58,16 +60,16 @@ const useStyles = makeStyles(() => ({
   headerbar: {
     display: 'flex',
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '12px',
-    lineHeight: '16px',
+    fontSize: '24px',
+    lineHeight: '32px',
     fontWeight: 400,
     color: '#818384',
     padding: '5px 0px'
   },
   linkFlair: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '12px',
-    lineHeight: '16px',
+    fontSize: '24px',
+    lineHeight: '32px',
     fontWeight: '500',
     color: 'white',
     width: 'fit-content',
@@ -90,6 +92,7 @@ const RedditPost = (props) => {
     subreddit_name_prefixed: subredditPrefixed,
     all_awardings: allAwards,
   } = post
+  console.log(allAwards)
   const fetchData = useCallback(async() => {
     const data = await getSubredditIcon(subreddit.display_name);
 
@@ -119,7 +122,7 @@ const RedditPost = (props) => {
         <div className={classes.awardsbar}>
           {_.map(_.sortBy(allAwards, ['name']), (award, i) => (
             <>
-              <Img key={award.name} className={classes.award} src={award.resized_icons[0].url} alt={award.name}/>
+              <Img key={award.name} className={classes.award} src={award.resized_icons[1].url} alt={award.name}/>
               {award.count > 1 && <span key={i} className={classes.awardcount}>{award.count}</span>}
             </>
           ))}

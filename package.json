@@ -4,7 +4,7 @@
   "description": "My Remotion video",
   "scripts": {
     "start": "remotion preview src/index.tsx",
-    "build": "remotion render src/index.tsx GeneratedVideo out/video.mp4 --timeout 60000",
+    "build": "remotion render src/index.tsx GeneratedVideo out/video.mp4 --timeout 90000",
     "upgrade": "remotion upgrade",
     "test": "eslint src --ext ts,tsx,js,jsx && tsc"
   },

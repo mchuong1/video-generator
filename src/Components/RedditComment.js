@@ -16,11 +16,12 @@ const useStyles = makeStyles(() => ({
     textAlign: 'start',
     zIndex: 5,
     position: 'absolute',
-    top: '48rem'
+    top: '48rem',
+    width: '1080px',
   },
   userIcon: {
     borderRadius: '50%',
-    height: '30px',
+    height: '60px',
     marginRight: '5px'
   },
   progress: {
@@ -29,8 +30,8 @@ const useStyles = makeStyles(() => ({
   header: {
     display: 'flex',
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '12px',
-    lineHeight: '16px',
+    fontSize: '24px',
+    lineHeight: '32px',
     fontWeight: 400,
     color: '#818384',
     padding: '5px 0px',
@@ -42,8 +43,8 @@ const useStyles = makeStyles(() => ({
   },
   awardsbar: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
-    fontSize: '12px',
-    lineHeight: '16px',
+    fontSize: '24px',
+    lineHeight: '32px',
     fontWeight: 400,
     color: '#818384',
     display: 'flex',
@@ -54,7 +55,7 @@ const useStyles = makeStyles(() => ({
   },
   award: {
     marginRight: '5px',
-    width: '16px'
+    width: '32px'
   },
   awardcount: {
     marginRight: '5px'
@@ -62,8 +63,8 @@ const useStyles = makeStyles(() => ({
   body: {
     fontFamily: 'Noto Sans, Arial, sans-serif',
     fontWeight: 400,
-    fontSize: '14px',
-    lineHeight: '21px'
+    fontSize: '28px',
+    lineHeight: '42px'
   }
 }));
 
@@ -104,9 +105,9 @@ const RedditComment = (props) => {
         </div>
         {allAwards.length > 0 &&
           <div className={classes.awardsbar}>
-            {_.map(allAwards, (award, i) => (
+            {_.map(_.sortBy(allAwards, ['name']), (award, i) => (
               <>
-                <Img key={award.name} className={classes.award} src={award.resized_icons[0].url} alt={award.name}/>
+                <Img key={award.name} className={classes.award} src={award.resized_icons[1].url} alt={award.name}/>
                 {award.count > 1 && <span key={i} className={classes.awardcount}>{award.count}</span>}
               </>
             ))}
