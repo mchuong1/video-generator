@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AbsoluteFill, Video, delayRender, continueRender, Audio, Sequence } from "remotion";
+import { AbsoluteFill, delayRender, continueRender, Audio, Sequence, OffthreadVideo } from "remotion";
 import { getRedditPost } from '../service/service';
 import _ from 'lodash';
 import RedditPost from './RedditPost';
@@ -7,7 +7,7 @@ import { getAudioDurationInSeconds } from '@remotion/media-utils';
 import { textToSpeech } from '../TextToSpeech';
 import RedditComment from './RedditComment';
 
-const CityVideo = (props) => {
+const RedditVideo = (props) => {
   const videoUrl = "https://mc-youtube-videos.s3.amazonaws.com/82dcea05-9de4-dfda-3854-edf0d7cf5669.mp4";
   const { postId, commentIds } = props;
 
@@ -35,7 +35,6 @@ const CityVideo = (props) => {
     const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
     const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(comment.body, 'enUSWoman1')));
     const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
-    console.log(commentAudioDurations)
 
     setPost(post);
     setAudioUrl(fileName);
@@ -54,12 +53,12 @@ const CityVideo = (props) => {
   return (
     <AbsoluteFill>
       {audioUrl ? <Audio src={audioUrl} /> : <></>}
-      <Video
+      <OffthreadVideo
         src={videoUrl}
-        style={{ height: '100%', transform: 'scale(3.5)' }}
+        style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
         startFrom={40*30}
       />
-      <Sequence from={0} durationInFrames={audioDuration * 30}>
+      <Sequence from={0} durationInFrames={parseInt(audioDuration * 30,10)}>
       {
         !_.isEmpty(post) &&
         <RedditPost post={post}/>
@@ -68,8 +67,9 @@ const CityVideo = (props) => {
       {comments.length > 0 &&
         _.map(comments, (comment, i) => {
           const newAudioDurations = commentAudioDurations.slice(0, i);
+          const defaultStart = parseInt(audioDuration * 30, 10);
           return (
-          <Sequence from={i === 0 ? audioDuration * 30 : parseInt(_.sum(newAudioDurations) * 30, 10) + audioDuration * 30} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
+          <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
             <RedditComment comment={comment} />
           </Sequence>
           );
@@ -78,9 +78,9 @@ const CityVideo = (props) => {
       {commentAudioUrls.length > 0 &&
         _.map(commentAudioUrls, (url, i) => {
           const newAudioDurations = commentAudioDurations.slice(0, i);
-          const defaultStart = audioDuration * 30;
+          const defaultStart = parseInt(audioDuration * 30, 10);
           return (
-            <Sequence from={i === 0 ? parseInt(defaultStart, 10) : parseInt(_.sum(newAudioDurations)*30+defaultStart, 10)} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
+            <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
               <Audio src={url}/>
             </Sequence>
           )
@@ -90,4 +90,4 @@ const CityVideo = (props) => {
   )
 }
 
-export default CityVideo;
+export default RedditVideo;

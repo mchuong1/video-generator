@@ -1,25 +1,60 @@
-import { useState } from 'react';
-import {Composition, getInputProps} from 'remotion';
-import CityVideo from './Components/CityVideo';
+import { useEffect, useState, useCallback } from 'react';
+import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
+import RedditVideo from './Components/RedditVideo';
+import { getRedditPost } from './service/service';
+import { textToSpeech } from './TextToSpeech';
+import _ from 'lodash';
+import { getAudioDurationInSeconds } from '@remotion/media-utils';
 
 export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const { postId, comments } = props;
-	const mockComments = "fgsj4rg,fgs9v44,fgs5ek3"
-	const [duration, setDuration] = useState(60);
+	const mockComments = "iab62k6,iab0moh,iab2w5s,iab1ebo,iab8y9f"
+	const mockPostId = "uzm67c"
+
+	const [handle] = useState(() => delayRender());
+  const [duration, setDuration] = useState(1);
+  const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
+	
+	const findComment = useCallback((id, collection, index = 0, depth = 1) => {
+    // Test other edge cases. This worked because the first depth index had your answer
+    if(_.find(collection, {id})) return _.find(collection, {id});
+    if(_.get(collection[index], 'replies', []).length > 0) return findComment(id, collection[index].replies);
+    return undefined;
+  }, []);
+	
+	const fetchData = useCallback(async () => {
+		const post = await getRedditPost(mockPostId);
+    const { title } = post;
+    const fileName = await textToSpeech(title, 'enUSWoman1');
+    const duration = await getAudioDurationInSeconds(fileName);
+
+    const comments = _.map(mockComments.split(','), id => findComment(id, post.comments));
+    const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(comment.body, 'enUSWoman1')));
+    const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+
+    setDuration(duration);
+    setCommentAudioDurations(commentAudioDurations);
+
+		continueRender(handle);
+	}, [handle, mockPostId, mockComments, findComment]);
+
+	useEffect(() => {
+		fetchData();
+	}, [fetchData])
 
 	return (
 		<>
 			<Composition
 				id="GeneratedVideo"
-				component={CityVideo}
-				durationInFrames={132 * 30}
+				component={RedditVideo}
+				durationInFrames={parseInt(_.sum([duration, ...commentAudioDurations]) * 30,10)}
 				fps={30}
 				width={1080}
 				height={1920}
 				defaultProps={{
-					postId: 'f08dxb',
+					postId: mockPostId,
 					commentIds: mockComments,
 				}}
 			/>
