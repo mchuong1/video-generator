@@ -5,6 +5,7 @@ import {
 	SpeechSynthesisResult,
 	SpeechSynthesizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
+import dotenv from 'dotenv';
 
 const voices = {
 	ptBRWoman: 'pt-BR-FranciscaNeural',
@@ -12,6 +13,8 @@ const voices = {
 	enUSWoman1: 'en-US-JennyNeural',
 	enUSWoman2: 'en-US-AriaNeural',
 } as const;
+
+dotenv.config()
 
 export const textToSpeech = async (
 	text: string,
