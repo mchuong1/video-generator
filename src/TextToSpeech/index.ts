@@ -17,6 +17,8 @@ export const textToSpeech = async (
 	text: string,
 	voice: keyof typeof voices
 ): Promise<string> => {
+	console.log("AZRUE KEY", Boolean(process.env.AZURE_TTS_KEY));
+	console.log("REGION", Boolean(process.env.AZURE_TTS_REGION));
 	const speechConfig = SpeechConfig.fromSubscription(
 		process.env.AZURE_TTS_KEY || '',
 		process.env.AZURE_TTS_REGION || ''
