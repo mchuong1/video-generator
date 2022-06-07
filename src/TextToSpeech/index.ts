@@ -18,7 +18,7 @@ export const textToSpeech = async (
 	voice: keyof typeof voices
 ): Promise<string> => {
 	if(Boolean(process.env.AZURE_TTS_KEY) === false ){
-		throw new Error('Secrets Found for either AZURE KEY');
+		throw new Error('Environment Variable NOT Found: AZURE KEY');
 	}
 	const speechConfig = SpeechConfig.fromSubscription(
 		process.env.AZURE_TTS_KEY || '',
