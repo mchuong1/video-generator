@@ -22,3 +22,10 @@ export const getSubredditIcon = (
   const result = r.getSubreddit(subreddit)
   return result.community_icon;
 }
+
+export const getRedditUserIcon = async (
+  userId: string
+): Promise<string> => {
+  const result = await r.getUser(userId).icon_img;
+  return result;
+}
