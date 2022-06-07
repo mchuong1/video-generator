@@ -5,7 +5,6 @@ import {
 	SpeechSynthesisResult,
 	SpeechSynthesizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
-import dotenv from 'dotenv';
 
 const voices = {
 	ptBRWoman: 'pt-BR-FranciscaNeural',
@@ -14,18 +13,16 @@ const voices = {
 	enUSWoman2: 'en-US-AriaNeural',
 } as const;
 
-dotenv.config()
-
 export const textToSpeech = async (
 	text: string,
 	voice: keyof typeof voices
 ): Promise<string> => {
-	if(Boolean(process.env.AZURE_TTS_KEY) === false ){
+	if(Boolean(process.env.REMOTION_AZURE_TTS_KEY) === false ){
 		throw new Error('Environment Variable NOT Found: AZURE KEY');
 	}
 	const speechConfig = SpeechConfig.fromSubscription(
-		process.env.AZURE_TTS_KEY || '',
-		process.env.AZURE_TTS_REGION || ''
+		process.env.REMOTION_AZURE_TTS_KEY || '',
+		process.env.REMOTION_AZURE_TTS_REGION || ''
 	);
 
 	if (!voices[voice]) {
@@ -73,13 +70,13 @@ export const textToSpeech = async (
 };
 
 const checkIfAudioHasAlreadyBeenSynthesized = async (fileName: string) => {
-	const bucketName = process.env.AWS_S3_BUCKET_NAME;
-	const awsRegion = process.env.AWS_S3_REGION;
+	const bucketName = process.env.REMOTION_AWS_S3_BUCKET_NAME;
+	const awsRegion = process.env.REMOTION_AWS_S3_REGION;
 	const s3 = new S3Client({
 		region: awsRegion,
 		credentials: {
-			accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+			accessKeyId: process.env.REMOTION_AWS_ACCESS_KEY_ID || '',
+			secretAccessKey: process.env.REMOTION_AWS_SECRET_ACCESS_KEY || '',
 		},
 	});
 
@@ -93,13 +90,13 @@ const checkIfAudioHasAlreadyBeenSynthesized = async (fileName: string) => {
 };
 
 const uploadTtsToS3 = async (audioData: ArrayBuffer, fileName: string) => {
-	const bucketName = process.env.AWS_S3_BUCKET_NAME;
-	const awsRegion = process.env.AWS_S3_REGION;
+	const bucketName = process.env.REMOTION_AWS_S3_BUCKET_NAME;
+	const awsRegion = process.env.REMOTION_AWS_S3_REGION;
 	const s3 = new S3Client({
 		region: awsRegion,
 		credentials: {
-			accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+			accessKeyId: process.env.REMOTION_AWS_ACCESS_KEY_ID || '',
+			secretAccessKey: process.env.REMOTION_AWS_SECRET_ACCESS_KEY || '',
 		},
 	});
 
@@ -113,7 +110,7 @@ const uploadTtsToS3 = async (audioData: ArrayBuffer, fileName: string) => {
 };
 
 const createS3Url = (filename: string) => {
-	const bucketName = process.env.AWS_S3_BUCKET_NAME;
+	const bucketName = process.env.REMOTION_AWS_S3_BUCKET_NAME;
 
 	return `https://${bucketName}.s3.amazonaws.com/${filename}`;
 };
