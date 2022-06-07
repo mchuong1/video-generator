@@ -33,12 +33,12 @@ jobs:
                   WORKFLOW_INPUT: ${{ toJson(github.event.inputs) }}
             - run: npm run build -- --props="./input-props.json"
               env:
-                  AZURE_TTS_KEY: ${{secrets.REMOTION_AZURE_TTS_KEY}}
-                  AZURE_TTS_REGION: ${{secrets.REMOTION_AZURE_TTS_REGION}}
-                  AWS_S3_BUCKET_NAME: ${{secrets.REMOTION_AWS_S3_BUCKET_NAME}}
-                  AWS_S3_REGION: ${{secrets.REMOTION_AWS_S3_REGION}}
-                  AWS_ACCESS_KEY_ID: ${{secrets.REMOTION_AWS_ACCESS_KEY_ID}}
-                  AWS_SECRET_ACCESS_KEY: ${{secrets.REMOTION_AWS_SECRET_ACCESS_KEY}}
+                  REMOTION_AZURE_TTS_KEY: ${{secrets.REMOTION_AZURE_TTS_KEY}}
+                  REMOTION_AZURE_TTS_REGION: ${{secrets.REMOTION_AZURE_TTS_REGION}}
+                  REMOTION_AWS_S3_BUCKET_NAME: ${{secrets.REMOTION_AWS_S3_BUCKET_NAME}}
+                  REMOTION_AWS_S3_REGION: ${{secrets.REMOTION_AWS_S3_REGION}}
+                  REMOTION_AWS_ACCESS_KEY_ID: ${{secrets.REMOTION_AWS_ACCESS_KEY_ID}}
+                  REMOTION_AWS_SECRET_ACCESS_KEY: ${{secrets.REMOTION_AWS_SECRET_ACCESS_KEY}}
             - uses: actions/upload-artifact@v2
               with:
                   name: out.mp4
