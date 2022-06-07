@@ -16,7 +16,7 @@ const useStyles = makeStyles(() => ({
     textAlign: 'start',
     zIndex: 5,
     position: 'absolute',
-    top: '2rem'
+    top: '48rem'
   },
   userIcon: {
     borderRadius: '50%',
