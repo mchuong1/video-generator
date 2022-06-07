@@ -17,8 +17,8 @@ export const textToSpeech = async (
 	text: string,
 	voice: keyof typeof voices
 ): Promise<string> => {
-	if(Boolean(process.env.AZURE_TTS_KEY) || Boolean(process.env.AZURE_TTS_REGION)){
-		throw new Error('Secrets Found for either AZURE KEY or REGION');
+	if(Boolean(process.env.AZURE_TTS_KEY) === false ){
+		throw new Error('Secrets Found for either AZURE KEY');
 	}
 	const speechConfig = SpeechConfig.fromSubscription(
 		process.env.AZURE_TTS_KEY || '',
