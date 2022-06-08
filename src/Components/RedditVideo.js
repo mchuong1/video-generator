@@ -19,11 +19,18 @@ const RedditVideo = (props) => {
   const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
 
-  const findComment = useCallback((id, collection, index = 0, depth = 1) => {
-    // Test other edge cases. This worked because the first depth index had your answer
+  const findComment = useCallback((id, collection) => {
+    if(collection.length === 0) return undefined;
     if(_.find(collection, {id})) return _.find(collection, {id});
-    if(_.get(collection[index], 'replies', []).length > 0) return findComment(id, collection[index].replies);
-    return undefined;
+    for(let i = 0; i < collection.length; i++) {
+      if(_.get(collection[i], 'replies', []).length > 0) {
+        if(_.find(collection[i].replies, {id})) return _.find(collection[i].replies, {id})
+      }
+    }
+    const newCollection = _.map(collection, listing => {
+      return listing.replies;
+    });
+    return findComment(id, _.flattenDeep(newCollection));
   }, []);
 
   const fetchData = useCallback(async () => {

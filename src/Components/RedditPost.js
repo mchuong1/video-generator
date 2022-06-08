@@ -92,7 +92,6 @@ const RedditPost = (props) => {
     subreddit_name_prefixed: subredditPrefixed,
     all_awardings: allAwards,
   } = post
-  console.log(allAwards)
 
   const fetchData = useCallback(async() => {
     const data = await getSubredditIcon(subreddit.display_name);
