@@ -29,7 +29,7 @@ export const RemotionVideo = () => {
     const duration = await getAudioDurationInSeconds(fileName);
 
     const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
-    const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(comment.body, 'enUSWoman1')));
+    const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
     const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
 
     setDuration(duration);
