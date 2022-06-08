@@ -75,8 +75,8 @@ const checkIfAudioHasAlreadyBeenSynthesized = async (fileName: string) => {
 	const s3 = new S3Client({
 		region: awsRegion,
 		credentials: {
-			accessKeyId: process.env.REMOTION_AWS_ACCESS_KEY_ID || '',
-			secretAccessKey: process.env.REMOTION_AWS_SECRET_ACCESS_KEY || '',
+			accessKeyId: process.env.REMOTION_MAIN_AWS_ACCESS_KEY_ID || '',
+			secretAccessKey: process.env.REMOTION_MAIN_AWS_SECRET_ACCESS_KEY || '',
 		},
 	});
 
@@ -95,8 +95,8 @@ const uploadTtsToS3 = async (audioData: ArrayBuffer, fileName: string) => {
 	const s3 = new S3Client({
 		region: awsRegion,
 		credentials: {
-			accessKeyId: process.env.REMOTION_AWS_ACCESS_KEY_ID || '',
-			secretAccessKey: process.env.REMOTION_AWS_SECRET_ACCESS_KEY || '',
+			accessKeyId: process.env.REMOTION_MAIN_AWS_ACCESS_KEY_ID || '',
+			secretAccessKey: process.env.REMOTION_MAIN_AWS_SECRET_ACCESS_KEY || '',
 		},
 	});
 
