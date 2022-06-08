@@ -12,12 +12,13 @@ const useStyles = makeStyles(() => ({
     marginBottom: '10px',
     backgroundColor: '#1A1A1B !important',
     color: '#D7DADC !important',
-    padding: '50px',
+    padding: '20px',
     textAlign: 'start',
     zIndex: 5,
     position: 'absolute',
     top: '48rem',
-    width: '1080px'
+    left: '8rem',
+    width: '800px'
   },
   communityIcon: {
     borderRadius: '50%',
