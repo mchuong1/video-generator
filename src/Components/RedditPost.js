@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => ({
     marginBottom: '10px',
     backgroundColor: '#1A1A1B !important',
     color: '#D7DADC !important',
-    padding: '20px',
+    padding: '50px',
     textAlign: 'start',
     zIndex: 5,
     position: 'absolute',
