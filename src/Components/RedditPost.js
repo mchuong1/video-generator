@@ -133,7 +133,7 @@ const RedditPost = (props) => {
         {!_.isEmpty(linkFlairText) && 
           <div
             className={classes.linkFlair}
-            style={{ backgroundColor: linkFlairColor.length === 0 ? linkFlairColor : '#303132' }}>
+            style={{ backgroundColor: _.get(post, 'link_flair_text', '').length === 0 ? linkFlairColor : '#303132' }}>
               {linkFlairText}
           </div>
         }

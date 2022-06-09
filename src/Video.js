@@ -5,6 +5,7 @@ import { getRedditPost } from './service/service';
 import { textToSpeech } from './TextToSpeech';
 import _ from 'lodash';
 import { getAudioDurationInSeconds } from '@remotion/media-utils';
+import { removeUrl } from './util/utils';
 
 export const RemotionVideo = () => {
 
@@ -14,7 +15,8 @@ export const RemotionVideo = () => {
 	const [handle] = useState(() => delayRender());
   const [duration, setDuration] = useState(1);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
-	
+  const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
+
   const findComment = useCallback((id, collection) => {
     if(collection.length === 0) return undefined;
     if(_.find(collection, {id})) return _.find(collection, {id});
@@ -31,16 +33,29 @@ export const RemotionVideo = () => {
 	
 	const fetchData = useCallback(async () => {
 		const post = await getRedditPost(postId);
-    const { title } = post;
-    const fileName = await textToSpeech(title, 'enUSWoman1');
-    const duration = await getAudioDurationInSeconds(fileName);
+    const { title, selftext } = post;
 
-    const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
-    const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
-    const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+    const postAudioUrl = await textToSpeech(title, 'enUSWoman1');
+    const duration = await getAudioDurationInSeconds(postAudioUrl);
+		setDuration(duration);
 
-    setDuration(duration);
-    setCommentAudioDurations(commentAudioDurations);
+    if(selftext.length > 0) {
+      const noUrlSelfText = removeUrl(selftext);
+      const selfTextArray = noUrlSelfText.split(/\r?\n/);
+      const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
+      
+      const selfTextAudioUrls = await Promise.all(_.map(filteredSelfTextArray, async comment => textToSpeech(comment, 'enUSWoman1')));
+      const selfTextAudioDurations = await Promise.all(_.map(selfTextAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+      setSelfTextAudioDurations(selfTextAudioDurations);
+			console.log(selfTextAudioDurations)
+    }
+
+		if(commentIds.length > 0) {
+			const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
+			const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
+			const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+			setCommentAudioDurations(commentAudioDurations);
+		}
 
 		continueRender(handle);
 	}, [handle, postId, commentIds, findComment]);
@@ -54,7 +69,7 @@ export const RemotionVideo = () => {
 			<Composition
 				id="GeneratedVideo"
 				component={RedditVideo}
-				durationInFrames={parseInt(_.sum([duration, ...commentAudioDurations]) * 30,10)}
+				durationInFrames={parseInt(_.sum([duration, ...commentAudioDurations, ...selfTextAudioDurations]) * 30 / 1.25,10)}
 				fps={30}
 				width={1080}
 				height={1920}

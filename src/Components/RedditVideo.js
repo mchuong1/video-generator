@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AbsoluteFill, delayRender, continueRender, Audio, Sequence, OffthreadVideo } from "remotion";
+import {
+  AbsoluteFill, delayRender, continueRender,
+  Audio, Sequence, OffthreadVideo,
+} from "remotion";
 import { getRedditPost } from '../service/service';
 import _ from 'lodash';
 import RedditPost from './RedditPost';
 import { getAudioDurationInSeconds } from '@remotion/media-utils';
 import { textToSpeech } from '../TextToSpeech';
 import RedditComment from './RedditComment';
+import { removeUrl } from '../util/utils';
+import SelfText from './Selftext';
 
 const RedditVideo = (props) => {
   const videoUrl = "https://mc-youtube-videos.s3.amazonaws.com/82dcea05-9de4-dfda-3854-edf0d7cf5669.mp4";
@@ -15,6 +20,9 @@ const RedditVideo = (props) => {
   const [audioUrl, setAudioUrl] = useState('');
   const [audioDuration, setAudioDuration] = useState(1);
   const [post, setPost] = useState({});
+  const [selfTextArray, setSelfTextArray] = useState([]);
+  const [selfTextAudioUrls, setSelfTextAudioUrls] = useState([]);
+  const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
   const [comments, setComments] = useState([]);
   const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
@@ -35,20 +43,34 @@ const RedditVideo = (props) => {
 
   const fetchData = useCallback(async () => {
     const post = await getRedditPost(postId);
-    const { title } = post;
-    const fileName = await textToSpeech(title, 'enUSWoman1');
-    const duration = await getAudioDurationInSeconds(fileName);
+    const { title, selftext } = post;
 
-    const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
-    const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
-    const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
-
+    const postAudio = await textToSpeech(title, 'enUSWoman1');
+    const duration = await getAudioDurationInSeconds(postAudio);
     setPost(post);
-    setAudioUrl(fileName);
+    setAudioUrl(postAudio);
     setAudioDuration(duration);
-    setComments(comments);
-    setCommentAudioUrls(commentAudioUrls);
-    setCommentAudioDurations(commentAudioDurations);
+
+    if(selftext.length > 0) {
+      const noUrlSelfText = removeUrl(selftext);
+      const selfTextArray = noUrlSelfText.split(/\r?\n/);
+      const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
+      
+      const selfTextAudioUrls = await Promise.all(_.map(filteredSelfTextArray, async comment => textToSpeech(comment, 'enUSWoman1')));
+      const selfTextAudioDurations = await Promise.all(_.map(selfTextAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+      setSelfTextArray(filteredSelfTextArray);
+      setSelfTextAudioUrls(selfTextAudioUrls);
+      setSelfTextAudioDurations(selfTextAudioDurations);
+    }
+
+    if(commentIds.length > 0){
+      const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
+      const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
+      const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+      setComments(comments);
+      setCommentAudioUrls(commentAudioUrls);
+      setCommentAudioDurations(commentAudioDurations);
+    }
 
 		continueRender(handle);
 	}, [handle, postId, commentIds, findComment]);
@@ -59,38 +81,48 @@ const RedditVideo = (props) => {
 
   return (
     <AbsoluteFill>
-      {audioUrl ? <Audio src={audioUrl} /> : <></>}
+      {audioUrl ? <Audio playbackRate={1.25} src={audioUrl} /> : <></>}
       <OffthreadVideo
         src={videoUrl}
         style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
         startFrom={40*30}
       />
-      <Sequence from={0} durationInFrames={parseInt(audioDuration * 30,10)}>
+      {
+        _.get(post, 'secure_media.reddit_video.dash_url', false) &&        
+        <div className="reddit_video">{_.get(post, 'secure_media.reddit_video.dash_url', false)}</div>
+      }
+      <Sequence from={0} durationInFrames={parseInt(audioDuration * 30/1.25,10)}>
       {
         !_.isEmpty(post) &&
         <RedditPost post={post}/>
       }
       </Sequence>
+      {selfTextArray.length > 0 && 
+        _.map(selfTextArray, (text, i) => {
+          const newAudioDurations = selfTextAudioDurations.slice(0, i);
+          const defaultStart = parseInt(audioDuration * 30/1.25, 10);
+          return(
+            <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30/1.25, 10) + defaultStart} durationInFrames={parseInt(selfTextAudioDurations[i] * 30/1.25, 10)}>
+              <>
+                <SelfText text={text} />
+                <Audio src={selfTextAudioUrls[i]} playbackRate={1.25}/>
+              </>
+            </Sequence>
+          )
+        })
+      }
       {comments.length > 0 &&
         _.map(comments, (comment, i) => {
           const newAudioDurations = commentAudioDurations.slice(0, i);
-          const defaultStart = parseInt(audioDuration * 30, 10);
+          const defaultStart = parseInt(audioDuration * 30/1.25, 10) + parseInt(_.sum(selfTextAudioDurations) * 30 / 1.25, 10);
           return (
-          <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
-            <RedditComment comment={comment} />
+          <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30/1.25, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30/1.25, 10)}>
+            <>
+              <RedditComment comment={comment} />
+              <Audio src={commentAudioUrls[i]} playbackRate={1.25}/>
+            </>
           </Sequence>
           );
-        })
-      }
-      {commentAudioUrls.length > 0 &&
-        _.map(commentAudioUrls, (url, i) => {
-          const newAudioDurations = commentAudioDurations.slice(0, i);
-          const defaultStart = parseInt(audioDuration * 30, 10);
-          return (
-            <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30, 10)}>
-              <Audio src={url}/>
-            </Sequence>
-          )
         })
       }
     </AbsoluteFill>
