@@ -81,8 +81,11 @@ const RedditComment = (props) => {
   const [userIcon, setUserIcon] = useState('');
 
   const fetchData = useCallback(async() => {
-    const data = await getRedditUserIcon(author.name);
-    setUserIcon(data)
+    console.log(author.name !== '[deleted]')
+    if(author.name !== '[deleted]'){
+      const data = await getRedditUserIcon(author.name);
+      setUserIcon(data)
+    }
 
     continueRender(handle);
   }, [handle, author]);
