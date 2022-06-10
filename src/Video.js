@@ -5,12 +5,16 @@ import { getRedditPost } from './service/service';
 import { textToSpeech } from './TextToSpeech';
 import _ from 'lodash';
 import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
-import { removeUrl } from './util/utils';
+import { removeUrl, findComment } from './util/utils';
 
 export const RemotionVideo = () => {
 
 	const props = getInputProps();
-	const { postId="uoi62o", commentIds="i8f48l9,i8fa3ac,i8fgvuv,i8gus5o,i8geoc8,i8fqm1r,i8g1448,i8euyzt,i8ezyqd,i8fqjiw", redditVideo="" } = props;
+	const {
+		postId="uoi62o",
+		commentIds="i8f48l9,i8fa3ac,i8fgvuv,i8gus5o,i8geoc8,i8fqm1r,i8g1448,i8euyzt,i8ezyqd,i8fqjiw",
+		redditVideo=""
+	} = props;
 
 	const [handle] = useState(() => delayRender());
 	const [post, setPost] = useState({});
@@ -23,20 +27,6 @@ export const RemotionVideo = () => {
 	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
 	const [videoDuration, setVideoDuration] = useState(1);
-
-  const findComment = useCallback((id, collection) => {
-    if(collection.length === 0) return undefined;
-    if(_.find(collection, {id})) return _.find(collection, {id});
-    for(let i = 0; i < collection.length; i++) {
-      if(_.get(collection[i], 'replies', []).length > 0) {
-        if(_.find(collection[i].replies, {id})) return _.find(collection[i].replies, {id})
-      }
-    }
-    const newCollection = _.map(collection, listing => {
-      return listing.replies;
-    });
-    return findComment(id, _.flattenDeep(newCollection));
-  }, []);
 	
 	const fetchData = useCallback(async () => {
 		const post = await getRedditPost(postId);
@@ -71,15 +61,11 @@ export const RemotionVideo = () => {
 
 		if(redditVideo !== "") {
 			getVideoMetadata(redditVideo)
-				.then(({ durationInSeconds }) => {
-					setVideoDuration(durationInSeconds);
-				})
-				.catch((err) => {
-					console.log(`Error fetching metadata: ${err}`);
-				});
+				.then(({ durationInSeconds }) => { setVideoDuration(durationInSeconds) })
+				.catch((err) => { console.log(`Error fetching metadata: ${err}`) });
 		}
 		continueRender(handle);
-	}, [handle, postId, commentIds, findComment, redditVideo]);
+	}, [handle, postId, commentIds, redditVideo]);
 
 	const totalDuration = () => {
 		console.log(videoDuration/2)
