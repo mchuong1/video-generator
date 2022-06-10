@@ -13,8 +13,8 @@ import { removeUrl } from '../util/utils';
 import SelfText from './Selftext';
 
 const RedditVideo = (props) => {
-  const videoUrl = "https://mc-youtube-videos.s3.amazonaws.com/82dcea05-9de4-dfda-3854-edf0d7cf5669.mp4";
-  const { postId, commentIds } = props;
+  const videoUrl = "https://mc-youtube-videos.s3.amazonaws.com/minecraft_relaxing_parkour.mp4";
+  const { postId, commentIds, redditVideo } = props;
 
   const [handle] = useState(() => delayRender());
   const [audioUrl, setAudioUrl] = useState('');
@@ -45,7 +45,7 @@ const RedditVideo = (props) => {
     const post = await getRedditPost(postId);
     const { title, selftext } = post;
 
-    const postAudio = await textToSpeech(title, 'enUSWoman1');
+    const postAudio = await textToSpeech(title, 'enUSMan1');
     const duration = await getAudioDurationInSeconds(postAudio);
     setPost(post);
     setAudioUrl(postAudio);
@@ -56,7 +56,7 @@ const RedditVideo = (props) => {
       const selfTextArray = noUrlSelfText.split(/\r?\n/);
       const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
       
-      const selfTextAudioUrls = await Promise.all(_.map(filteredSelfTextArray, async comment => textToSpeech(comment, 'enUSWoman1')));
+      const selfTextAudioUrls = await Promise.all(_.map(filteredSelfTextArray, async comment => textToSpeech(comment, 'enUSMan1')));
       const selfTextAudioDurations = await Promise.all(_.map(selfTextAudioUrls, async urls => getAudioDurationInSeconds(urls)));
       setSelfTextArray(filteredSelfTextArray);
       setSelfTextAudioUrls(selfTextAudioUrls);
@@ -65,7 +65,7 @@ const RedditVideo = (props) => {
 
     if(commentIds.length > 0){
       const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
-      const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSWoman1')));
+      const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSMan1')));
       const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
       setComments(comments);
       setCommentAudioUrls(commentAudioUrls);
@@ -85,11 +85,15 @@ const RedditVideo = (props) => {
       <OffthreadVideo
         src={videoUrl}
         style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
-        startFrom={40*30}
+        startFrom={144*30}
+        volume={0}
       />
-      {
-        _.get(post, 'secure_media.reddit_video.dash_url', false) &&        
-        <div className="reddit_video">{_.get(post, 'secure_media.reddit_video.dash_url', false)}</div>
+      {redditVideo !== "" &&
+        <OffthreadVideo 
+          src={redditVideo}
+          style={{ zIndex: 5, transform: 'translateY(-29rem)' }}
+          playbackRate={2}
+        />
       }
       <Sequence from={0} durationInFrames={parseInt(audioDuration * 30/1.25,10)}>
       {
