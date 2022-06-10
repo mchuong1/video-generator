@@ -81,7 +81,6 @@ const RedditComment = (props) => {
   const [userIcon, setUserIcon] = useState('');
 
   const fetchData = useCallback(async() => {
-    console.log(author.name !== '[deleted]')
     if(author.name !== '[deleted]'){
       const data = await getRedditUserIcon(author.name);
       setUserIcon(data)
