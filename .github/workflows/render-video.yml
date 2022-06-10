@@ -10,6 +10,10 @@ on:
                 description: "Put CommentIds here seperated by a comma"
                 required: true
                 default: "iab62k6,iab0moh,iab2w5s,iab1ebo,iab8y9f"
+            redditVideo:
+                description: "Put Reddit Video Url Here. must be MP4 or webm"
+                required: true
+                default: ""
 jobs:
     render:
         name: Render video
@@ -30,8 +34,8 @@ jobs:
                   REMOTION_AZURE_TTS_REGION: ${{secrets.REMOTION_AZURE_TTS_REGION}}
                   REMOTION_AWS_S3_BUCKET_NAME: ${{secrets.REMOTION_AWS_S3_BUCKET_NAME}}
                   REMOTION_AWS_S3_REGION: ${{secrets.REMOTION_AWS_S3_REGION}}
-                  REMOTION_MAIN_AWS_ACCESS_KEY_ID: ${{secrets.REMOTION_AWS_ACCESS_KEY_ID}}
-                  REMOTION_MAIN_AWS_SECRET_ACCESS_KEY: ${{secrets.REMOTION_AWS_SECRET_ACCESS_KEY}}
+                  REMOTION_AWS_ACCESS_KEY_ID: ${{secrets.REMOTION_AWS_ACCESS_KEY_ID}}
+                  REMOTION_AWS_SECRET_ACCESS_KEY: ${{secrets.REMOTION_AWS_SECRET_ACCESS_KEY}}
                   REMOTION_CLIENT_ID: ${{secrets.REMOTION_CLIENT_ID}}
                   REMOTION_CLIENT_SECRET: ${{secrets.REMOTION_CLIENT_SECRET}}
                   REMOTION_REDDIT_USERNAME: ${{secrets.REMOTION_REDDIT_USERNAME}}
