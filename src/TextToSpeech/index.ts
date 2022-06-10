@@ -11,6 +11,7 @@ const voices = {
 	ptBRMan: 'pt-BR-AntonioNeural',
 	enUSWoman1: 'en-US-JennyNeural',
 	enUSWoman2: 'en-US-AriaNeural',
+	enUSMan1: 'en-US-ChristopherNeural'
 } as const;
 
 export const textToSpeech = async (
@@ -29,7 +30,7 @@ export const textToSpeech = async (
 		throw new Error('Voice not found');
 	}
 
-	const fileName = `${md5(text)}.mp3`;
+	const fileName = `${md5(text+voice)}.mp3`;
 
 	const fileExists = await checkIfAudioHasAlreadyBeenSynthesized(fileName);
 
