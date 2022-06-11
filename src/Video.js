@@ -61,7 +61,7 @@ export const RemotionVideo = () => {
 		}
 
 		if(redditVideo !== "") {
-			getVideoMetadata(redditVideo)
+			await getVideoMetadata(redditVideo)
 				.then(({ durationInSeconds }) => { setVideoDuration(durationInSeconds) })
 				.catch((err) => { console.log(`Error fetching metadata: ${err}`) });
 		}
