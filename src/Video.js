@@ -11,9 +11,10 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="uoi62o",
-		commentIds="i8f48l9,i8fa3ac,i8fgvuv,i8gus5o,i8geoc8,i8fqm1r,i8g1448,i8euyzt,i8ezyqd,i8fqjiw",
-		redditVideo=""
+		postId="v82f5y",
+		commentIds="ibo1jku,ibo8ded,iborsxr,ibo2frd,iboet4f,ibob2c8,ibocya3",
+		redditVideo="https://v.redd.it/i3zuxtdx9h491/DASH_720.mp4",
+		redditAudio="https://v.redd.it/i3zuxtdx9h491/DASH_audio.mp4",
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -68,8 +69,9 @@ export const RemotionVideo = () => {
 	}, [handle, postId, commentIds, redditVideo]);
 
 	const totalDuration = () => {
-		console.log(videoDuration/2)
+		console.log(videoDuration)
 		console.log(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) /1.25);
+		if(redditAudio.length > 0) return Math.round(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) * 30 / 1.25 + (Math.round(videoDuration*30)));
 		return Math.round(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) * 30 / 1.25);
 	}
 
@@ -99,6 +101,8 @@ export const RemotionVideo = () => {
 					commentAudioUrls,
 					commentAudioDurations,
 					redditVideo,
+					redditAudio,
+					videoDuration,
 				}}
 			/>
 		</>

@@ -13,7 +13,7 @@ const RedditVideo = (props) => {
     post, postAudioUrl, postAudioDuration,
     comments, commentAudioUrls, commentAudioDurations,
     selfTextArray, selfTextAudioUrls, selfTextAudioDurations,
-    redditVideo
+    redditVideo, redditAudio, videoDuration,
   } = props;
 
   return (
@@ -25,12 +25,21 @@ const RedditVideo = (props) => {
         startFrom={144*30}
         volume={0}
       />
-      {redditVideo !== "" &&
-        <OffthreadVideo 
-          src={redditVideo}
-          style={{ zIndex: 5, transform: 'translateY(-29rem)' }}
-          playbackRate={2}
-        />
+      {
+        redditAudio.length === 0 &&
+        <>
+          {redditVideo.length > 0 &&
+            <OffthreadVideo 
+            src={redditVideo}
+            style={{ zIndex: 5, transform: 'translateY(-29rem)' }}
+            playbackRate={2}
+            />
+          }
+          {
+            redditAudio.length > 0 &&
+            <Audio src={redditAudio} />
+          }
+        </>
       }
       <Sequence from={0} durationInFrames={parseInt(postAudioDuration * 30/1.25,10)}>
       {
@@ -52,10 +61,17 @@ const RedditVideo = (props) => {
           )
         })
       }
+      {
+        redditAudio.length > 0 && 
+        <Sequence from={parseInt(postAudioDuration * 30/1.25,10)} durationInFrames={parseInt(videoDuration * 30, 10)}>
+          <OffthreadVideo src={redditVideo} style={{ zIndex: 5, height: 'fit-content', width: 'inherit', alignSelf: 'center' }}/>
+          <Audio src={redditAudio}/>
+        </Sequence>
+      }
       {comments.length > 0 &&
         _.map(comments, (comment, i) => {
           const newAudioDurations = commentAudioDurations.slice(0, i);
-          const defaultStart = parseInt(postAudioDuration * 30/1.25, 10) + parseInt(_.sum(selfTextAudioDurations) * 30 / 1.25, 10);
+          const defaultStart = parseInt(postAudioDuration * 30/1.25, 10) + parseInt(_.sum(selfTextAudioDurations) * 30 / 1.25, 10) + parseInt(videoDuration * 30, 10);
           return (
           <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30/1.25, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30/1.25, 10)}>
             <>
