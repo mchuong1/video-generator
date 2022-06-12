@@ -70,7 +70,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RedditComment = (props) => {
-  const { comment } = props;
+  const { comment, isMulti } = props;
   const classes = useStyles(props);
   const {
     author, body, created,
@@ -116,7 +116,7 @@ const RedditComment = (props) => {
             ))}
           </div>
         }
-        <div className={classes.body}>{body}</div>
+        <div className={classes.body}>{isMulti ? _.get(comment, 'bodyArray[0]') : body}</div>
       </Paper>
     </>
   )
@@ -124,6 +124,11 @@ const RedditComment = (props) => {
 
 RedditComment.propTypes = {
   comment: PropTypes.shape({}).isRequired,
+  isMulti: PropTypes.bool,
 };
+
+RedditComment.defaulProps = {
+  isMulti: false
+}
 
 export default RedditComment;

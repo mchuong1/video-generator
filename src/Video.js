@@ -11,10 +11,11 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="v82f5y",
-		commentIds="ibo1jku,ibo8ded,iborsxr,ibo2frd,iboet4f,ibob2c8,ibocya3",
-		redditVideo="https://v.redd.it/i3zuxtdx9h491/DASH_720.mp4",
-		redditAudio="https://v.redd.it/i3zuxtdx9h491/DASH_audio.mp4",
+		postId="uxeni4",
+		commentIds="i9zfsbx,i9zj37k,ia0zmyz,i9zq7f8,i9zqj88,i9yimd6,ia1pkqi,i9y94kw,i9zi1ld,i9yj6fe,i9yjl6v,i9y787n,i9z9k35,i9zpduv",
+		redditVideo="",
+		redditAudio="",
+		voice="enUSMan1",
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -28,12 +29,22 @@ export const RemotionVideo = () => {
 	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
 	const [videoDuration, setVideoDuration] = useState(1);
+
+	const getAudioUrls = useCallback(async (textArray) => {
+		const urls = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(text, voice) : getAudioUrls(text)));
+		return urls;
+	}, [voice]);
+
+	const getAudioDurations = useCallback(async (audioUrls) => {
+		const durations = await Promise.all(_.map(audioUrls, url => typeof url === 'string' ? getAudioDurationInSeconds(url) : getAudioDurations(url)));
+		return durations;
+	}, [])
 	
 	const fetchData = useCallback(async () => {
 		const post = await getRedditPost(postId);
     const { title, selftext } = post;
 
-    const postAudioUrl = await textToSpeech(title, 'enUSMan1');
+    const postAudioUrl = await textToSpeech(title, voice);
     const duration = await getAudioDurationInSeconds(postAudioUrl);
 		setPost(post);
 		setPostAudioUrl(postAudioUrl);
@@ -44,8 +55,8 @@ export const RemotionVideo = () => {
       const selfTextArray = noUrlSelfText.split(/\r?\n/);
       const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
       
-      const selfTextAudioUrls = await Promise.all(_.map(filteredSelfTextArray, async comment => textToSpeech(comment, 'enUSMan1')));
-      const selfTextAudioDurations = await Promise.all(_.map(selfTextAudioUrls, async urls => getAudioDurationInSeconds(urls)));
+      const selfTextAudioUrls = await getAudioUrls(filteredSelfTextArray);
+      const selfTextAudioDurations = await getAudioDurations(selfTextAudioUrls);
 			setSelfTextArray(filteredSelfTextArray);
 			setSelfTextAudioUrls(selfTextAudioUrls);
       setSelfTextAudioDurations(selfTextAudioDurations);
@@ -53,26 +64,37 @@ export const RemotionVideo = () => {
 
 		if(commentIds.length > 0) {
 			const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
-			const commentAudioUrls = await Promise.all(_.map(comments, async comment => textToSpeech(_.get(comment,'body', ''), 'enUSMan1')));
-			const commentAudioDurations = await Promise.all(_.map(commentAudioUrls, async urls => getAudioDurationInSeconds(urls)));
-			setComments(comments);
+			const parsedComments = _.map(comments, comment => {
+				if(_.get(comment, 'body', '').length > 300) {
+					const removedUrl = removeUrl(comment.body)
+					return {
+						...comment,
+						bodyArray: removedUrl.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|"),
+					}
+				}
+				return comment;
+			});
+			const commentAudioUrls = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : comment.body));
+			const commentAudioDurations = await getAudioDurations(commentAudioUrls);
+			setComments(parsedComments);
 			setCommentAudioUrls(commentAudioUrls);
 			setCommentAudioDurations(commentAudioDurations);
 		}
 
-		if(redditVideo !== "") {
+		if(redditVideo.length > 0) {
 			await getVideoMetadata(redditVideo)
 				.then(({ durationInSeconds }) => { setVideoDuration(durationInSeconds) })
 				.catch((err) => { console.log(`Error fetching metadata: ${err}`) });
 		}
 		continueRender(handle);
-	}, [handle, postId, commentIds, redditVideo]);
+	}, [handle, postId, commentIds, redditVideo, voice, getAudioUrls, getAudioDurations]);
 
 	const totalDuration = () => {
-		console.log(videoDuration)
-		console.log(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) /1.25);
-		if(redditAudio.length > 0) return Math.round(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) * 30 / 1.25 + (Math.round(videoDuration*30)));
-		return Math.round(_.sum([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations]) * 30 / 1.25);
+		// Aconsole.log(videoDuration)
+		// console.log(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) /1.25);
+		// console.log(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])));
+		if(redditAudio.length > 0) return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) * 30 / 1.25 + (Math.ceil(videoDuration*30)));
+		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) * 30 / 1.25);
 	}
 
 	useEffect(() => {

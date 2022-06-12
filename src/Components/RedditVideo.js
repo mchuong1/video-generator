@@ -16,9 +16,32 @@ const RedditVideo = (props) => {
     redditVideo, redditAudio, videoDuration,
   } = props;
 
+  const generateCommentSequence = (comment, bodyArray, audioDurations, audioUrls, defaultStart) => {
+    return _.map(bodyArray, (text, i) => {
+      const audioDuration = Math.ceil(_.sum(audioDurations.slice(0, i)) * 30 / 1.25);
+      const durationInFrames = Math.ceil(audioDurations[i] * 30 / 1.25);
+      return i === 0
+      ? (
+        <Sequence from={defaultStart} durationInFrames={durationInFrames}>
+          <>
+            <RedditComment isMulti comment={comment}/>
+            <Audio src={audioUrls[i]} playbackRate={1.25}/>
+          </>
+        </Sequence>
+      ) : (
+        <Sequence from={defaultStart + audioDuration} durationInFrames={durationInFrames}>
+          <>
+            <SelfText text={text}/>
+            <Audio src={audioUrls[i]} playbackRate={1.25}/>
+          </>
+        </Sequence>
+      )
+    });
+  }
+
   return (
     <AbsoluteFill>
-      {postAudioUrl.length > 0 ? <Audio playbackRate={1.25} src={postAudioUrl} /> : <></>}
+      {postAudioUrl.length > 0 ? <Audio src={postAudioUrl} playbackRate={1.25}/> : <></>}
       <OffthreadVideo
         src={videoUrl}
         style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
@@ -35,13 +58,9 @@ const RedditVideo = (props) => {
             playbackRate={2}
             />
           }
-          {
-            redditAudio.length > 0 &&
-            <Audio src={redditAudio} />
-          }
         </>
       }
-      <Sequence from={0} durationInFrames={parseInt(postAudioDuration * 30/1.25,10)}>
+      <Sequence from={0} durationInFrames={Math.ceil(postAudioDuration * 30/1.25)}>
       {
         !_.isEmpty(post) &&
         <RedditPost post={post}/>
@@ -50,9 +69,9 @@ const RedditVideo = (props) => {
       {selfTextArray.length > 0 && 
         _.map(selfTextArray, (text, i) => {
           const newAudioDurations = selfTextAudioDurations.slice(0, i);
-          const defaultStart = parseInt(postAudioDuration * 30/1.25, 10);
+          const defaultStart = Math.ceil(postAudioDuration * 30/1.25);
           return(
-            <Sequence key={i} from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30/1.25, 10) + defaultStart} durationInFrames={parseInt(selfTextAudioDurations[i] * 30/1.25, 10)}>
+            <Sequence key={i} from={i === 0 ? defaultStart : Math.ceil(_.sum(newAudioDurations) * 30/1.25) + defaultStart} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/1.25)}>
               <>
                 <SelfText text={text} />
                 <Audio src={selfTextAudioUrls[i]} playbackRate={1.25}/>
@@ -63,17 +82,21 @@ const RedditVideo = (props) => {
       }
       {
         redditAudio.length > 0 && 
-        <Sequence from={parseInt(postAudioDuration * 30/1.25,10)} durationInFrames={parseInt(videoDuration * 30, 10)}>
+        <Sequence from={Math.ceil(postAudioDuration * 30/1.25,10)} durationInFrames={Math.ceil(videoDuration * 30)}>
           <OffthreadVideo src={redditVideo} style={{ zIndex: 5, height: 'fit-content', width: 'inherit', alignSelf: 'center' }}/>
           <Audio src={redditAudio}/>
         </Sequence>
       }
       {comments.length > 0 &&
         _.map(comments, (comment, i) => {
-          const newAudioDurations = commentAudioDurations.slice(0, i);
-          const defaultStart = parseInt(postAudioDuration * 30/1.25, 10) + parseInt(_.sum(selfTextAudioDurations) * 30 / 1.25, 10) + parseInt(videoDuration * 30, 10);
-          return (
-          <Sequence from={i === 0 ? defaultStart : parseInt(_.sum(newAudioDurations) * 30/1.25, 10) + defaultStart} durationInFrames={parseInt(commentAudioDurations[i] * 30/1.25, 10)}>
+          const newAudioDuration = Math.ceil(_.sum(_.flatten(commentAudioDurations.slice(0, i))) * 30 / 1.25);
+          const defaultStart = Math.ceil(postAudioDuration * 30/1.25) + Math.ceil(_.sum(selfTextAudioDurations) * 30 / 1.25) + Math.ceil(videoDuration * 30);
+          return _.get(comment, 'bodyArray', false)
+          ? generateCommentSequence(
+            comment, comment.bodyArray, commentAudioDurations[i], commentAudioUrls[i], (defaultStart + newAudioDuration)
+          )
+          : (
+          <Sequence from={i === 0 ? defaultStart : newAudioDuration + defaultStart} durationInFrames={Math.ceil(commentAudioDurations[i] * 30/1.25)}>
             <>
               <RedditComment comment={comment} />
               <Audio src={commentAudioUrls[i]} playbackRate={1.25}/>
