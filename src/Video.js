@@ -11,8 +11,8 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="uxeni4",
-		commentIds="i9zfsbx,i9zj37k,ia0zmyz,i9zq7f8,i9zqj88,i9yimd6,ia1pkqi,i9y94kw,i9zi1ld,i9yj6fe,i9yjl6v,i9y787n,i9z9k35,i9zpduv",
+		postId="ve96r4",
+		commentIds="icovb9e,icpgz2y,icouw73,icovx6y,icoxg4j,icovd51,icove7y,icow4bw",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -27,7 +27,7 @@ export const RemotionVideo = () => {
   const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
 	const [comments, setComments] = useState([]);
 	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
-  const [commentAudioDurations, setCommentAudioDurations] = useState([1,1,1]);
+  const [commentAudioDurations, setCommentAudioDurations] = useState([1]);
 	const [videoDuration, setVideoDuration] = useState(1);
 
 	const getAudioUrls = useCallback(async (textArray) => {

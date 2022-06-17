@@ -2,7 +2,8 @@ import _ from 'lodash';
 
 export const removeUrl = (string) => {
   const parsedSelfText = _.replace(string, /\(https:\/\/.*\)/g, '');
-  return parsedSelfText;
+  const noChineseChars = _.replace(parsedSelfText, /[^a-zA-Z\d\s,’.?!\(\)‘"'”\-“\[\]]+/g, '');
+  return noChineseChars;
 }
 
 export const findComment = (id, collection) => {
