@@ -92,9 +92,8 @@ export const RemotionVideo = () => {
 	const totalDuration = () => {
 		// Aconsole.log(videoDuration)
 		// console.log(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) /1.25);
-		// console.log(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])));
-		if(redditAudio.length > 0) return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) * 30 / 1.25 + (Math.ceil(videoDuration*30)));
-		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) * 30 / 1.25);
+		const selfTextPlusVideoDuration = Math.ceil((_.sum(selfTextAudioDurations) > 1 ? _.sum(selfTextAudioDurations) : 0) * 30 / 1.25) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
+		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / 1.25 + selfTextPlusVideoDuration);
 	}
 
 	useEffect(() => {
