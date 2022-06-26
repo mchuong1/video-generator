@@ -3,7 +3,8 @@ import _ from 'lodash';
 export const removeUrl = (string) => {
   const parsedSelfText = _.replace(string, /\(https:\/\/.*\)/g, '');
   // eslint-disable-next-line no-useless-escape
-  const noChineseChars = _.replace(parsedSelfText, /[^a-zA-Z\d\s,’.?!\(\)‘"'”\-“\[\]]+/g, '');
+  const noRemoved = _.replace(parsedSelfText, '[removed]', '');
+  const noChineseChars = _.replace(noRemoved, /[^a-zA-Z\d\s,’.?!\(\)‘"'”\-“\[\]]+/g, '');
   return noChineseChars;
 }
 

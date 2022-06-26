@@ -4,7 +4,7 @@ import { getSubredditIcon } from '../service/service';
 import _ from 'lodash';
 import moment from 'moment';
 import { makeStyles } from '@mui/styles';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { continueRender, delayRender, Img } from 'remotion';
 
 const useStyles = makeStyles(() => ({
@@ -123,7 +123,7 @@ const RedditPost = (props) => {
         <div className={classes.awardsbar}>
           {_.map(_.sortBy(allAwards, ['name']), (award, i) => (
             <>
-              <Img key={award.name} className={classes.award} src={award.resized_static_icons[1].url} alt={award.name}/>
+              <Img key={i} className={classes.award} src={award.resized_static_icons[1].url} alt={award.name}/>
               {award.count > 1 && <span key={i} className={classes.awardcount}>{award.count}</span>}
             </>
           ))}
