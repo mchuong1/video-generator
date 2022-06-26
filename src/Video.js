@@ -11,8 +11,8 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="ve96r4",
-		commentIds="icovb9e,icpgz2y,icouw73,icovx6y,icoxg4j,icovd51,icove7y,icow4bw",
+		postId="vkp6k2",
+		commentIds="idrgkor,idrgmbq,idrns7z,idqqhor,idrhhwj,idqvxo3,idqwfxe,idqljit,idqgopk,idqxx0f,idqnwcn,idr622g,idqvbu4,idqj3m2,idr1rm8,idqim5t,idqz2dk,idqo0ov,idqju35",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -69,7 +69,7 @@ export const RemotionVideo = () => {
 					const removedUrl = removeUrl(comment.body)
 					return {
 						...comment,
-						bodyArray: removedUrl.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|"),
+						bodyArray: removedUrl.replace(/([.?!])\s*(?=[a-zA-Z])/g, "$1|").split("|"),
 					}
 				}
 				return comment;
