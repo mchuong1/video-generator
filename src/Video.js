@@ -11,8 +11,8 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="vkp6k2",
-		commentIds="idrgkor,idrgmbq,idrns7z,idqqhor,idrhhwj,idqvxo3,idqwfxe,idqljit,idqgopk,idqxx0f,idqnwcn,idr622g,idqvbu4,idqj3m2,idr1rm8,idqim5t,idqz2dk,idqo0ov,idqju35",
+		postId="oe5uja",
+		commentIds="h456yxy,h451286,h44wn3y",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -90,8 +90,6 @@ export const RemotionVideo = () => {
 	}, [handle, postId, commentIds, redditVideo, voice, getAudioUrls, getAudioDurations]);
 
 	const totalDuration = () => {
-		// Aconsole.log(videoDuration)
-		// console.log(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations, ...selfTextAudioDurations])) /1.25);
 		const selfTextPlusVideoDuration = Math.ceil((_.sum(selfTextAudioDurations) > 1 ? _.sum(selfTextAudioDurations) : 0) * 30 / 1.25) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
 		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / 1.25 + selfTextPlusVideoDuration);
 	}
