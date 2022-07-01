@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
     fontSize: '40px',
     lineHeight: '48px',
     fontWeight: '500',
-    marginBottom: '5px'
+    marginBottom: '10px'
   },
   awardsbar: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
@@ -88,6 +88,7 @@ const RedditPost = (props) => {
   const {
     title, author,
     subreddit, created,
+    over_18: over18,
     link_flair_text: linkFlairText,
     link_flair_background_color: linkFlairColor,
     subreddit_name_prefixed: subredditPrefixed,
@@ -135,6 +136,12 @@ const RedditPost = (props) => {
             className={classes.linkFlair}
             style={{ backgroundColor: _.get(post, 'link_flair_text', '').length === 0 ? linkFlairColor : '#303132' }}>
               {linkFlairText}
+          </div>
+        }
+        {
+          over18 && 
+          <div className={classes.linkFlair} style={{ backgroundColor: 'red' }}>
+              NSFW
           </div>
         }
       </Paper>

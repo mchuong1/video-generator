@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
 import { getRedditUserIcon } from '../service/service';
 import { continueRender, delayRender, Img } from 'remotion';
+import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -116,7 +117,7 @@ const RedditComment = (props) => {
             ))}
           </div>
         }
-        <div className={classes.body}>{isMulti ? _.get(comment, 'bodyArray[0]') : body}</div>
+        <div className={classes.body}>{isMulti ? _.get(comment, 'bodyArray[0]') : replaceBadWords(body)}</div>
       </Paper>
     </>
   )

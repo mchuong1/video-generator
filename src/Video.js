@@ -5,14 +5,14 @@ import { getRedditPost } from './service/service';
 import { textToSpeech } from './TextToSpeech';
 import _ from 'lodash';
 import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
-import { removeUrl, findComment } from './util/utils';
+import { removeUrl, findComment, replaceBadWords } from './util/utils';
 
 export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="oe5uja",
-		commentIds="h456yxy,h451286,h44wn3y",
+		postId="voxgri",
+		commentIds="iefqvo8,iefp7dr,iegb5ie,iefo5fa,iefs0pn,iefoq1k,iefsqxa,iefrt6i",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -31,7 +31,7 @@ export const RemotionVideo = () => {
 	const [videoDuration, setVideoDuration] = useState(1);
 
 	const getAudioUrls = useCallback(async (textArray) => {
-		const urls = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(text, voice) : getAudioUrls(text)));
+		const urls = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(replaceBadWords(text), voice) : getAudioUrls(text)));
 		return urls;
 	}, [voice]);
 
@@ -66,7 +66,7 @@ export const RemotionVideo = () => {
 			const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
 			const parsedComments = _.map(comments, comment => {
 				if(_.get(comment, 'body', '').length > 300) {
-					const removedUrl = removeUrl(comment.body)
+					const removedUrl = replaceBadWords(removeUrl(comment.body))
 					return {
 						...comment,
 						bodyArray: removedUrl.replace(/([.?!])\s*(?=[a-zA-Z])/g, "$1|").split("|"),

@@ -44,7 +44,7 @@ const RedditVideo = (props) => {
       <OffthreadVideo
         src={video}
         style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
-        startFrom={3705*30}
+        startFrom={3897*30}
         volume={0}
       />
       <Series>
