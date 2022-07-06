@@ -6,6 +6,7 @@ import moment from 'moment';
 import { makeStyles } from '@mui/styles';
 import React, { useCallback, useEffect, useState } from 'react';
 import { continueRender, delayRender, Img } from 'remotion';
+import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -130,7 +131,7 @@ const RedditPost = (props) => {
           ))}
         </div>
         }
-        <div className={classes.title}>{title}</div>
+        <div className={classes.title}>{replaceBadWords(title)}</div>
         {!_.isEmpty(linkFlairText) && 
           <div
             className={classes.linkFlair}
