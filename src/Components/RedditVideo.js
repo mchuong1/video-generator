@@ -7,31 +7,32 @@ import RedditPost from './RedditPost';
 import RedditComment from './RedditComment';
 import SelfText from './Selftext';
 // Aimport video from '../../mp4/minecraft_relaxing_parkour.mp4'
-import video from '../../mp4/sonic_omens.webm';
+import video from '../../mp4/sonic_generations.mp4';
 
 const RedditVideo = (props) => {
   const {
     post, postAudioUrl, postAudioDuration,
-    comments, commentAudioUrls, commentAudioDurations,
+    comments, commentAudioUrls, commentAudioDurations, commentWordBoundaryUrls,
     selfTextArray, selfTextAudioUrls, selfTextAudioDurations,
     redditVideo, redditAudio, videoDuration,
   } = props;
 
-  const generateCommentSequence = (comment, bodyArray, audioDurations, audioUrls) => {
+  // eslint-disable-next-line max-params
+  const generateCommentSequence = (comment, bodyArray, audioDurations, audioUrls, wordBoundaryUrls) => {
     return _.map(bodyArray, (text, i) => {
       const durationInFrames = Math.ceil(audioDurations[i] * 30 / 1.25);
       return i === 0
       ? (
         <Series.Sequence durationInFrames={durationInFrames}>
           <>
-            <RedditComment isMulti comment={comment}/>
+            <RedditComment isMulti comment={comment} wordBoundaryUrl={wordBoundaryUrls[i]}/>
             <Audio src={audioUrls[i]} playbackRate={1.25}/>
           </>
         </Series.Sequence>
       ) : (
         <Series.Sequence durationInFrames={durationInFrames}>
           <>
-            <SelfText text={text}/>
+            <SelfText text={text} wordBoundaryUrl={wordBoundaryUrls[i]}/>
             <Audio src={audioUrls[i]} playbackRate={1.25}/>
           </>
         </Series.Sequence>
@@ -44,7 +45,7 @@ const RedditVideo = (props) => {
       <OffthreadVideo
         src={video}
         style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
-        startFrom={3897*30}
+        startFrom={363*30}
         volume={0}
       />
       <Series>
@@ -58,7 +59,7 @@ const RedditVideo = (props) => {
         {selfTextArray.length > 0 && 
           _.map(selfTextArray, (text, i) => {
             return(
-              <Series.Sequence key={i} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/1.25)}>
+              <Series.Sequence key={text} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/1.25)}>
                 <>
                   <SelfText text={text} />
                   <Audio src={selfTextAudioUrls[i]} playbackRate={1.25}/>
@@ -78,11 +79,12 @@ const RedditVideo = (props) => {
           _.map(comments, (comment, i) => {
             return _.get(comment, 'bodyArray', false)
             ? generateCommentSequence(
-              comment, comment.bodyArray, commentAudioDurations[i], commentAudioUrls[i],
+              comment, comment.bodyArray, commentAudioDurations[i],
+              commentAudioUrls[i], commentWordBoundaryUrls[i]
             )
             : (
             <Series.Sequence durationInFrames={Math.ceil(commentAudioDurations[i] * 30/1.25)}>
-              <RedditComment comment={comment} />
+              <RedditComment comment={comment} wordBoundaryUrl={commentWordBoundaryUrls[i]}/>
               <Audio src={commentAudioUrls[i]} playbackRate={1.25}/>
             </Series.Sequence>
             );

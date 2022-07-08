@@ -5,7 +5,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
 import { getRedditUserIcon } from '../service/service';
-import { continueRender, delayRender, Img } from 'remotion';
+import { continueRender, delayRender, Img, Sequence } from 'remotion';
 import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
@@ -71,15 +71,25 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RedditComment = (props) => {
-  const { comment, isMulti } = props;
+  const { comment, isMulti, wordBoundaryUrl } = props;
   const classes = useStyles(props);
   const {
     author, body, created,
     all_awardings: allAwards,
   } = comment;
 
+  const text = isMulti ? _.split(_.get(comment, 'bodyArray[0]'), ' ') : _.split(body, ' ');
+
   const [handle] = useState(() => delayRender());
   const [userIcon, setUserIcon] = useState('');
+  const [textArray, setTextArray] = useState([]);
+  const [wordBoundary, setWordBoundary] = useState([]);
+
+  function isNumeric(str) {
+		if (typeof str !== "string") return false // We only process strings!  
+		return !isNaN(str) && // Use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+					 !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+	}
 
   const fetchData = useCallback(async() => {
     if(author.name !== '[deleted]'){
@@ -87,6 +97,33 @@ const RedditComment = (props) => {
       setUserIcon(data)
     }
 
+    const data = await fetch(wordBoundaryUrl).then(response => response.json());
+
+		// Adding punction values to text
+		const punctuation = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~][...]/g, '').length === 0);
+		_.map(punctuation, p => {
+			const index = _.indexOf(data, p)
+			data[index-1].privDuration = data[index-1].privDuration + data[index].privDuration;
+			data[index-1].privText = data[index-1].privText + data[index].privText;
+		});
+		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
+
+    // Adding numbers to text
+		const numberText = _.filter(text, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
+    const punctuationText = _.filter(text, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
+		_.map(numberText, p => {
+			const index = _.indexOf(text, p);
+			text[index+1] = text[index] + " " + text[index + 1]
+		});
+    _.map(punctuationText, p => {
+			const index = _.indexOf(text, p);
+			text[index+1] = text[index] + " " + text[index + 1]
+		});
+
+    const parsedText = _.filter(text, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
+
+    setTextArray(parsedText);
+		setWordBoundary(parsedData);
     continueRender(handle);
   }, [handle, author]);
 
@@ -117,7 +154,20 @@ const RedditComment = (props) => {
             ))}
           </div>
         }
-        <div className={classes.body}>{isMulti ? _.get(comment, 'bodyArray[0]') : replaceBadWords(body)}</div>
+        <div className={classes.body}>
+        {/* {isMulti ? _.get(comment, 'bodyArray[0]') : replaceBadWords(body)} */}
+          {
+            _.map(textArray, (t, i) => {
+              const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3*.75);
+              return (
+                <Sequence from={from} layout="none">
+                  <span>
+                    {replaceBadWords(t) + ' '}
+                  </span>
+                </Sequence>
+            )})
+          }
+        </div>
       </Paper>
     </>
   )
@@ -126,6 +176,7 @@ const RedditComment = (props) => {
 RedditComment.propTypes = {
   comment: PropTypes.shape({}).isRequired,
   isMulti: PropTypes.bool,
+  wordBoundaryUrl: PropTypes.string.isRequired,
 };
 
 RedditComment.defaulProps = {

@@ -11,8 +11,8 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="vr8842",
-		commentIds="ieuzl2f,iets5jh",
+		postId="vs1fsi",
+		commentIds="ieyoar3,ieypznd,ieyqrua,ieypm25,ieyo4ic,ieyi81f,ieylec0,ieyqil6,ieyknvb,ieyif3i",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -22,17 +22,21 @@ export const RemotionVideo = () => {
 	const [post, setPost] = useState({});
 	const [postAudioUrl, setPostAudioUrl] = useState('');
   const [postAudioDuration, setPostAudioDuration] = useState(1);
+	const [postWordBoundaryUrl, setPostWordBoundaryUrl] = useState('');
 	const [selfTextArray, setSelfTextArray] = useState([]);
 	const [selfTextAudioUrls, setSelfTextAudioUrls] = useState([]);
   const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
 	const [comments, setComments] = useState([]);
 	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1]);
+	const [commentWordBoundaryUrls, setCommentWordBoundaryUrls] = useState([]);
 	const [videoDuration, setVideoDuration] = useState(1);
 
 	const getAudioUrls = useCallback(async (textArray) => {
-		const urls = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(replaceBadWords(text), voice) : getAudioUrls(text)));
-		return urls;
+		const result = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(replaceBadWords(text), voice) : getAudioUrls(text)));
+		const ttsUrl = _.map(result, r => r.ttsUrl);
+		const wordBoundaryUrl = _.map(result, r => r.wordBoundaryUrl);
+		return { ttsUrl, wordBoundaryUrl };
 	}, [voice]);
 
 	const getAudioDurations = useCallback(async (audioUrls) => {
@@ -44,11 +48,12 @@ export const RemotionVideo = () => {
 		const post = await getRedditPost(postId);
     const { title, selftext } = post;
 
-    const postAudioUrl = await textToSpeech(replaceBadWords(title), voice);
+    const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(replaceBadWords(title), voice);
     const duration = await getAudioDurationInSeconds(postAudioUrl);
 		setPost(post);
 		setPostAudioUrl(postAudioUrl);
 		setPostAudioDuration(duration);
+		setPostWordBoundaryUrl(postWordBoundaryUrl);
 
     if(selftext.length > 0) {
       const noUrlSelfText = removeUrl(selftext);
@@ -74,11 +79,12 @@ export const RemotionVideo = () => {
 				}
 				return comment;
 			});
-			const commentAudioUrls = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : comment.body));
+			const {ttsUrl: commentAudioUrls, wordBoundaryUrl} = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : comment.body));
 			const commentAudioDurations = await getAudioDurations(commentAudioUrls);
 			setComments(parsedComments);
 			setCommentAudioUrls(commentAudioUrls);
 			setCommentAudioDurations(commentAudioDurations);
+			setCommentWordBoundaryUrls(wordBoundaryUrl);
 		}
 
 		if(redditVideo.length > 0) {
@@ -112,6 +118,7 @@ export const RemotionVideo = () => {
 					postId,
 					postAudioUrl,
 					postAudioDuration,
+					postWordBoundaryUrl,
 					selfTextArray,
 					selfTextAudioUrls,
 					selfTextAudioDurations,
@@ -119,6 +126,7 @@ export const RemotionVideo = () => {
 					commentIds,
 					commentAudioUrls,
 					commentAudioDurations,
+					commentWordBoundaryUrls,
 					redditVideo,
 					redditAudio,
 					videoDuration,

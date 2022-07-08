@@ -125,7 +125,7 @@ const RedditPost = (props) => {
         <div className={classes.awardsbar}>
           {_.map(_.sortBy(allAwards, ['name']), (award, i) => (
             <>
-              <Img key={i} className={classes.award} src={award.resized_static_icons[1].url} alt={award.name}/>
+              <Img key={award.name} className={classes.award} src={award.resized_static_icons[1].url} alt={award.name}/>
               {award.count > 1 && <span key={i} className={classes.awardcount}>{award.count}</span>}
             </>
           ))}
