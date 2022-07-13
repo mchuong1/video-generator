@@ -11,11 +11,13 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="vs1fsi",
-		commentIds="ieyoar3,ieypznd,ieyqrua,ieypm25,ieyo4ic,ieyi81f,ieylec0,ieyqil6,ieyknvb,ieyif3i",
+		postId="voxgri",
+		commentIds="iefviwb,iefrf4n,iefzp3v,iefrg5y,iefqvo8,iefsaga,iefpzw2,iefnwic,iefo0w5,iegfvpt,iegfvjz,iegc9jb",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
+		playbackRate=1.25,
+		videoStart=686,
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -26,6 +28,7 @@ export const RemotionVideo = () => {
 	const [selfTextArray, setSelfTextArray] = useState([]);
 	const [selfTextAudioUrls, setSelfTextAudioUrls] = useState([]);
   const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
+	const [selfTextWordBoundaryUrls, setSelfTextWordBoundaryUrls] = useState([]);
 	const [comments, setComments] = useState([]);
 	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
   const [commentAudioDurations, setCommentAudioDurations] = useState([1]);
@@ -57,20 +60,21 @@ export const RemotionVideo = () => {
 
     if(selftext.length > 0) {
       const noUrlSelfText = removeUrl(selftext);
-      const selfTextArray = noUrlSelfText.split(/\r?\n/);
+      const selfTextArray = noUrlSelfText.replace(/([.?!])\s*(?=[a-zA-Z])/g, "$1|").split("|");
       const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
       
-      const selfTextAudioUrls = await getAudioUrls(filteredSelfTextArray);
+      const { ttsUrl: selfTextAudioUrls, wordBoundaryUrl } = await getAudioUrls(filteredSelfTextArray);
       const selfTextAudioDurations = await getAudioDurations(selfTextAudioUrls);
 			setSelfTextArray(filteredSelfTextArray);
 			setSelfTextAudioUrls(selfTextAudioUrls);
       setSelfTextAudioDurations(selfTextAudioDurations);
+			setSelfTextWordBoundaryUrls(wordBoundaryUrl);
     }
 
 		if(commentIds.length > 0) {
 			const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
 			const parsedComments = _.map(comments, comment => {
-				if(_.get(comment, 'body', '').length > 300) {
+				if(_.get(comment, 'body', '').length > 150) {
 					const removedUrl = replaceBadWords(removeUrl(comment.body))
 					return {
 						...comment,
@@ -96,8 +100,8 @@ export const RemotionVideo = () => {
 	}, [handle, postId, commentIds, redditVideo, voice, getAudioUrls, getAudioDurations]);
 
 	const totalDuration = () => {
-		const selfTextPlusVideoDuration = Math.ceil((_.sum(selfTextAudioDurations) > 1 ? _.sum(selfTextAudioDurations) : 0) * 30 / 1.25) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
-		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / 1.25 + selfTextPlusVideoDuration);
+		const selfTextPlusVideoDuration = Math.ceil((_.sum(selfTextAudioDurations) > 1 ? _.sum(selfTextAudioDurations) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
+		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / playbackRate + selfTextPlusVideoDuration);
 	}
 
 	useEffect(() => {
@@ -122,6 +126,7 @@ export const RemotionVideo = () => {
 					selfTextArray,
 					selfTextAudioUrls,
 					selfTextAudioDurations,
+					selfTextWordBoundaryUrls,
 					comments,
 					commentIds,
 					commentAudioUrls,
@@ -130,6 +135,8 @@ export const RemotionVideo = () => {
 					redditVideo,
 					redditAudio,
 					videoDuration,
+					playbackRate,
+					videoStart
 				}}
 			/>
 		</>
