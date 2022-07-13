@@ -24,10 +24,10 @@ export const findComment = (id, collection) => {
 }
 
 export const replaceBadWords = string => {
-  const parsedString = _.replace(string, /([sS][Ee][xX])/g, 'sex').replace(/([fF][uU][cC][kK])/g, 'eff').replace(/([cC][oO][cC][kK])/g, 'sausage')
+  const parsedString = _.replace(string, /([sS][Ee][xX])/g, 's x').replace(/([fF][uU][cC][kK])/g, 'eff').replace(/([cC][oO][cC][kK])/g, 'sausage')
   .replace(/([pP][eE][nN][iI][sS])/g, 'pencil').replace(/([sS][hH][iI][tT])/g, 'poop').replace(/([cC][uU][nN][tT])/g, 'nugget')
   .replace(/([bB][iI][cC][tT][cC][hH])/g, 'bish').replace(/([dD][aA][mM][nN])/g, 'dang').replace(/([bB][aA][sS][tT][aA][rR][dD])/g, 'dog')
-  .replace(/([pP][iI][sS][sS])/g, 'peen').replace(/([dD][iI][cC][kK])/g, 'sausage').replace(/([aA][sS][sS])/g, 'butt').replace(/[pP][oO][rR][Nn]/g, 'corn')
-  .replace(/[vV][aA][gG][iI][nN][aA]/g, 'v-card');
+  .replace(/([pP][iI][sS][sS])/g, 'pee').replace(/([dD][iI][cC][kK])/g, 'sausage').replace(/([aA][sS][sS])/g, 'ass').replace(/[pP][oO][rR][Nn]/g, 'corn')
+  .replace(/[vV][aA][gG][iI][nN][aA]/g, 'v-card').replace(/[pP][rR][Oo][sS][tT][iI][tT][uU][tT][eE]/g, 'adult fun time');
   return parsedString;
 }
