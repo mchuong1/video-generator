@@ -20,14 +20,14 @@ const useStyles = makeStyles(() => ({
   },
   body: {
     fontFamily: 'Noto Sans, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: '28px',
-    lineHeight: '42px'
+    fontWeight: 500,
+    fontSize: '40px',
+    lineHeight: '48px'
   }
 }))
 
 const SelfText = (props) => {
-  const { text, wordBoundaryUrl } = props;
+  const { text, wordBoundaryUrl, playbackRate } = props;
   const classes = useStyles();
 
   const [handle] = useState(() => delayRender());
@@ -54,19 +54,19 @@ const SelfText = (props) => {
 		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
 
     // Adding numbers to text
-		const numberText = _.filter(splitText, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
-    const punctuationText = _.filter(splitText, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
-		_.map(numberText, p => {
-			const index = _.indexOf(splitText, p);
-			splitText[index+1] = splitText[index] + " " + splitText[index + 1]
-		});
-    _.map(punctuationText, p => {
-			const index = _.indexOf(splitText, p);
-			splitText[index+1] = splitText[index] + " " + splitText[index + 1]
-		});
-    const parsedText = _.filter(splitText, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
+		// const numberText = _.filter(splitText, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
+    // const punctuationText = _.filter(splitText, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
+		// _.map(numberText, p => {
+		// 	const index = _.indexOf(splitText, p);
+		// 	splitText[index+1] = splitText[index] + " " + splitText[index + 1]
+		// });
+    // _.map(punctuationText, p => {
+		// 	const index = _.indexOf(splitText, p);
+		// 	splitText[index+1] = splitText[index] + " " + splitText[index + 1]
+		// });
+    // const parsedText = _.filter(splitText, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
 
-    setTextArray(parsedText);
+    setTextArray(splitText);
 		setWordBoundary(parsedData);
     continueRender(handle);
   }, [handle, wordBoundaryUrl]);
@@ -81,7 +81,7 @@ const SelfText = (props) => {
         {/* {text} */}
         {
           _.map(textArray, (t, i) => {
-            const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3*.75);
+            const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3/playbackRate);
             return (
               <Sequence from={from} layout="none">
                 <span>

@@ -64,14 +64,14 @@ const useStyles = makeStyles(() => ({
   },
   body: {
     fontFamily: 'Noto Sans, Arial, sans-serif',
-    fontWeight: 400,
-    fontSize: '28px',
-    lineHeight: '42px'
+    fontWeight: 500,
+    fontSize: '40px',
+    lineHeight: '48px'
   }
 }));
 
 const RedditComment = (props) => {
-  const { comment, isMulti, wordBoundaryUrl } = props;
+  const { comment, isMulti, wordBoundaryUrl, playbackRate } = props;
   const classes = useStyles(props);
   const {
     author, body, created,
@@ -109,20 +109,21 @@ const RedditComment = (props) => {
 		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
 
     // Adding numbers to text
-		const numberText = _.filter(text, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
-    const punctuationText = _.filter(text, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
-		_.map(numberText, p => {
-			const index = _.indexOf(text, p);
-			text[index+1] = text[index] + " " + text[index + 1]
-		});
-    _.map(punctuationText, p => {
-			const index = _.indexOf(text, p);
-			text[index+1] = text[index] + " " + text[index + 1]
-		});
+		// const numberText = _.filter(text, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
+    // const punctuationText = _.filter(text, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
+		// _.map(numberText, p => {
+		// 	const index = _.indexOf(text, p);
+		// 	text[index+1] = text[index] + " " + text[index + 1]
+    //   _.replace(text[index+1], 'undefined', '');
+		// });
+    // _.map(punctuationText, p => {
+		// 	const index = _.indexOf(text, p);
+		// 	text[index+1] = text[index] + " " + text[index + 1]
+		// });
 
-    const parsedText = _.filter(text, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
+    // const parsedText = _.filter(text, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
 
-    setTextArray(parsedText);
+    setTextArray(text);
 		setWordBoundary(parsedData);
     continueRender(handle);
   }, [handle, author]);
@@ -158,7 +159,7 @@ const RedditComment = (props) => {
         {/* {isMulti ? _.get(comment, 'bodyArray[0]') : replaceBadWords(body)} */}
           {
             _.map(textArray, (t, i) => {
-              const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3*.75);
+              const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3/playbackRate);
               return (
                 <Sequence from={from} layout="none">
                   <span>
