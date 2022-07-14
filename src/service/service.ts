@@ -1,7 +1,7 @@
 import snoowrap from 'snoowrap';
 
 const r = new snoowrap({
-  userAgent: 'redditVideoG',
+  userAgent: 'redditVideoGenerator',
   clientId: process.env.REMOTION_CLIENT_ID,
   clientSecret: process.env.REMOTION_CLIENT_SECRET,
   username: process.env.REMOTION_REDDIT_USERNAME,

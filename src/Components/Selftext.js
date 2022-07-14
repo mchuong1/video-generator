@@ -27,22 +27,14 @@ const useStyles = makeStyles(() => ({
 }))
 
 const SelfText = (props) => {
-  const { text, wordBoundaryUrl, playbackRate } = props;
+  const { wordBoundaryUrl, playbackRate } = props;
   const classes = useStyles();
 
   const [handle] = useState(() => delayRender());
-  const [textArray, setTextArray] = useState('');
   const [wordBoundary, setWordBoundary] = useState([]);
-
-  function isNumeric(str) {
-		if (typeof str !== "string") return false // We only process strings!  
-		return !isNaN(str) && // Use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-					 !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-	}
 
   const fetchData = useCallback(async () => {
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
-    const splitText = _.split(text, ' ');
 
     // Adding punction values to text
 		const punctuation = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~][...]/g, '').length === 0);
@@ -53,20 +45,6 @@ const SelfText = (props) => {
 		});
 		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
 
-    // Adding numbers to text
-		// const numberText = _.filter(splitText, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
-    // const punctuationText = _.filter(splitText, d => _.replace(d, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length === 0);
-		// _.map(numberText, p => {
-		// 	const index = _.indexOf(splitText, p);
-		// 	splitText[index+1] = splitText[index] + " " + splitText[index + 1]
-		// });
-    // _.map(punctuationText, p => {
-		// 	const index = _.indexOf(splitText, p);
-		// 	splitText[index+1] = splitText[index] + " " + splitText[index + 1]
-		// });
-    // const parsedText = _.filter(splitText, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')) && t.length > 0);
-
-    setTextArray(splitText);
 		setWordBoundary(parsedData);
     continueRender(handle);
   }, [handle, wordBoundaryUrl]);
@@ -80,12 +58,12 @@ const SelfText = (props) => {
       <div className={classes.body}>
         {/* {text} */}
         {
-          _.map(textArray, (t, i) => {
-            const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3/playbackRate);
+          _.map(wordBoundary, (word) => {
+            const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
             return (
               <Sequence from={from} layout="none">
                 <span>
-                  {replaceBadWords(t) + ' '}
+                  {replaceBadWords(word.privText) + ' '}
                 </span>
               </Sequence>
           )})
