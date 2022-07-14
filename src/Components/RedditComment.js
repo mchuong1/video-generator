@@ -94,7 +94,8 @@ const RedditComment = (props) => {
   const fetchData = useCallback(async() => {
     if(author.name !== '[deleted]'){
       const data = await getRedditUserIcon(author.name);
-      setUserIcon(data)
+      // eslint-disable-next-line no-negated-condition
+      !_.isNil(data) ? setUserIcon(data) : null;
     }
 
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
