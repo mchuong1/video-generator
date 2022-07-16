@@ -11,13 +11,13 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="voxgri",
-		commentIds="iefviwb,iefrf4n,iefzp3v,iefrg5y,iefqvo8,iefsaga,iefpzw2,iefnwic,iefo0w5,iegfvpt,iegfvjz,iegc9jb",
+		postId="vywakc",
+		commentIds="ig599ec",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
-		playbackRate=1.25,
-		videoStart=686,
+		playbackRate=1,
+		videoStart=836,
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -111,7 +111,7 @@ export const RemotionVideo = () => {
 	return (
 		<>
 			<Composition
-				id="GeneratedVideo"
+				id="RedditVideo"
 				component={RedditVideo}
 				durationInFrames={totalDuration()}
 				fps={30}
