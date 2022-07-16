@@ -16,7 +16,6 @@ const RedditVideo = (props) => {
     redditVideo, redditAudio, videoDuration, playbackRate, videoStart
   } = props;
 
-  // eslint-disable-next-line max-params
   const generateCommentSequence = (comment, audioDurations, audioUrls, wordBoundaryUrls) => {
     return _.map(comment.bodyArray, (text, i) => {
       const durationInFrames = Math.ceil(audioDurations[i] * 30 / playbackRate);

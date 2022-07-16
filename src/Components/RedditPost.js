@@ -19,7 +19,8 @@ const useStyles = makeStyles(() => ({
     position: 'absolute',
     top: '48rem',
     left: '8rem',
-    width: '800px'
+    width: '800px',
+    opacity: '99%'
   },
   communityIcon: {
     borderRadius: '50%',

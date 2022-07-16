@@ -17,6 +17,7 @@ const useStyles = makeStyles(() => ({
     top: '48rem',
     left: '8rem',
     width: '800px',
+    opacity: '99%'
   },
   body: {
     fontFamily: 'Noto Sans, Arial, sans-serif',

@@ -20,6 +20,7 @@ const useStyles = makeStyles(() => ({
     top: '48rem',
     left: '8rem',
     width: '800px',
+    opacity: '99%'
   },
   userIcon: {
     borderRadius: '50%',
