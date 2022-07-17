@@ -41,7 +41,7 @@ export const SubtitleWordByWord = ({playbackRate, wordBoundaryUrl}) => {
 					fontSize: 100,
 					textAlign: 'center',
 					position: 'absolute',
-					bottom: 160,
+					bottom: '75rem',
 					width: '100%',
 				}}
 			>

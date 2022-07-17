@@ -7,6 +7,7 @@ import RedditPost from './RedditPost';
 import RedditComment from './RedditComment';
 import SelfText from './Selftext';
 import video from '../../mp4/sonic_generations.mp4';
+import { SubtitleWordByWord } from "./SubtitleWordByWord";
 
 const RedditVideo = (props) => {
   const {
@@ -33,7 +34,7 @@ const RedditVideo = (props) => {
       const durationInFrames = Math.ceil(audioDurations[i] * 30 / playbackRate);
       return i === 0
       ? (
-        <Series.Sequence durationInFrames={durationInFrames}>
+        <Series.Sequence durationInFrames={durationInFrames} name={comment.id}>
           <>
             <RedditComment comment={comment} wordBoundaryUrl={wordBoundaryUrls[i]} playbackRate={playbackRate}/>
             <Audio src={audioUrls[i]} playbackRate={playbackRate}/>
@@ -71,7 +72,8 @@ const RedditVideo = (props) => {
             return(
               <Series.Sequence key={text} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/playbackRate)}>
                 <>
-                  <SelfText playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} />
+                  {/* <SelfText playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} /> */}
+                  <SubtitleWordByWord playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} />
                   <Audio src={selfTextAudioUrls[i]} playbackRate={playbackRate}/>
                 </>
               </Series.Sequence>
@@ -93,7 +95,7 @@ const RedditVideo = (props) => {
               commentAudioUrls[i], commentWordBoundaryUrls[i]
             )
             : (
-            <Series.Sequence durationInFrames={Math.ceil(commentAudioDurations[i] * 30/playbackRate)}>
+            <Series.Sequence durationInFrames={Math.ceil(commentAudioDurations[i] * 30/playbackRate)} name={comment.id}>
               <RedditComment comment={comment} wordBoundaryUrl={commentWordBoundaryUrls[i]} playbackRate={playbackRate}/>
               <Audio src={commentAudioUrls[i]} playbackRate={playbackRate}/>
             </Series.Sequence>

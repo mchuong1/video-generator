@@ -11,13 +11,13 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="vxk50h",
-		commentIds="",
+		postId="w0ambs",
+		commentIds="igdg62a,igdg0zl,igd94qd,igdmw7v,igdkwjk",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
-		playbackRate=1,
-		videoStart=836,
+		playbackRate=1.25,
+		videoStart=902,
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -27,7 +27,7 @@ export const RemotionVideo = () => {
 	const [videoDuration, setVideoDuration] = useState(1);
 
 	const getAudioUrls = useCallback(async (textArray) => {
-		const result = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(replaceBadWords(text), voice) : getAudioUrls(text)));
+		const result = await Promise.all(_.map(textArray, text => typeof text === 'string' ? textToSpeech(text, voice) : getAudioUrls(text)));
 		const ttsUrl = _.map(result, r => r.ttsUrl);
 		const wordBoundaryUrl = _.map(result, r => r.wordBoundaryUrl);
 		return { ttsUrl, wordBoundaryUrl };
@@ -60,7 +60,7 @@ export const RemotionVideo = () => {
 			const comments = _.map(commentIds.split(','), id => findComment(id, post.comments));
 			const parsedComments = _.map(comments, comment => {
 				if(_.get(comment, 'body', '').length > 150) {
-					const removedUrl = replaceBadWords(removeUrl(comment.body))
+					const removedUrl = removeUrl(comment.body)
 					return {
 						...comment,
 						bodyArray: removedUrl.replace(/([.?!])\s*(?=[a-zA-Z])/g, "$1|").split("|"),
