@@ -57,7 +57,6 @@ const SelfText = (props) => {
   return(
     <Paper classes={{ root: classes.paper }}>
       <div className={classes.body}>
-        {/* {text} */}
         {
           _.map(wordBoundary, (word) => {
             const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
