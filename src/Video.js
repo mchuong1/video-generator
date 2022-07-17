@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
-import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
-import RedditVideo from './Components/RedditVideo';
-import { getRedditPost } from './service/service';
-import { textToSpeech } from './TextToSpeech';
 import _ from 'lodash';
-import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
+import { textToSpeech } from './TextToSpeech';
+import { getRedditPost } from './service/service';
+import RedditVideo from './Components/RedditVideo';
+import { useEffect, useState, useCallback } from 'react';
 import { removeUrl, findComment, replaceBadWords } from './util/utils';
+import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
+import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
 
 export const RemotionVideo = () => {
 
@@ -18,6 +18,7 @@ export const RemotionVideo = () => {
 		voice="enUSMan1",
 		playbackRate=1.25,
 		videoStart=902,
+		videoUrl=""
 	} = props;
 
 	const [handle] = useState(() => delayRender());
@@ -107,7 +108,8 @@ export const RemotionVideo = () => {
 					redditAudio,
 					videoDuration,
 					playbackRate,
-					videoStart
+					videoStart,
+					videoUrl
 				}}
 			/>
 		</>

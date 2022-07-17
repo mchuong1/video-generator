@@ -1,21 +1,27 @@
+import _ from 'lodash';
+import React , { useState, useEffect, useCallback } from 'react';
 import {
   AbsoluteFill, Series,
-  Audio, OffthreadVideo,
+  Audio, OffthreadVideo, delayRender, continueRender
 } from "remotion";
-import _ from 'lodash';
+import SelfText from './Selftext';
 import RedditPost from './RedditPost';
 import RedditComment from './RedditComment';
-import SelfText from './Selftext';
 import video from '../../mp4/sonic_generations.mp4';
 import { SubtitleWordByWord } from "./SubtitleWordByWord";
+import { getVideoMetadata } from '@remotion/media-utils';
 
 const RedditVideo = (props) => {
   const {
     post,
     comments,
     selfText,
+    videoUrl,
     redditVideo, redditAudio, videoDuration, playbackRate, videoStart
   } = props;
+
+  const [handle] = useState(() => delayRender());
+  const [shouldScale, setShouldScale] = useState(true);
 
   const postAudioDuration = _.get(post, 'postAudioDuration', 1);
   const postAudioUrl = _.get(post, 'postAudioUrl', '');
@@ -27,6 +33,18 @@ const RedditVideo = (props) => {
   const selfTextAudioUrls = _.get(selfText, 'selfTextAudioUrls', []);
   const selfTextAudioDurations = _.get(selfText, 'selfTextAudioDurations', [1]);
   const selfTextWordBoundaryUrls = _.get(selfText, 'selfTextWordBoundaryUrls', []);
+
+  const fetchVideoData = useCallback(async () => {
+    if(videoUrl.length > 0 ) {
+      const { height, width } = await getVideoMetadata(videoUrl); 
+      setShouldScale(width > height);
+    }
+    continueRender(handle);
+  }, [handle, videoUrl])
+
+  useEffect(() => {
+		fetchVideoData();
+	}, [fetchVideoData])
 
 
   const generateCommentSequence = (comment, audioDurations, audioUrls, wordBoundaryUrls) => {
@@ -54,8 +72,8 @@ const RedditVideo = (props) => {
   return (
     <AbsoluteFill>
       <OffthreadVideo
-        src={video}
-        style={{ transform: 'scale(3.5) translate(0px, 160px)' }}
+        src={videoUrl.length > 0 ? videoUrl : video}
+        style={{ transform: `${shouldScale ? 'scale(3.5) translate(0px, 160px)' : ''}` }}
         startFrom={videoStart*30}
         volume={0}
       />
