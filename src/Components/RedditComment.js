@@ -104,7 +104,7 @@ const RedditComment = (props) => {
 
 		setWordBoundary(parsedData);
     continueRender(handle);
-  }, [handle, author]);
+  }, [handle, author, wordBoundaryUrl]);
 
   useEffect(() => {
     fetchData();
@@ -134,7 +134,6 @@ const RedditComment = (props) => {
           </div>
         }
         <div className={classes.body}>
-        {/* {isMulti ? _.get(comment, 'bodyArray[0]') : replaceBadWords(body)} */}
           {
             _.map(wordBoundary, word => {
               const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
