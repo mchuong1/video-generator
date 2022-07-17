@@ -13,11 +13,9 @@ import { getVideoMetadata } from '@remotion/media-utils';
 
 const RedditVideo = (props) => {
   const {
-    post,
-    comments,
-    selfText,
-    videoUrl,
-    redditVideo, redditAudio, videoDuration, playbackRate, videoStart
+    post, comments, selfText,
+    videoUrl, redditVideo, redditAudio,
+    videoDuration, playbackRate, videoStart
   } = props;
 
   const [handle] = useState(() => delayRender());
