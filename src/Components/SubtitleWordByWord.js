@@ -6,18 +6,10 @@ import {
 } from 'remotion';
 import _ from 'lodash';
 
-export const SubtitleWordByWord = ({subtitle, playbackRate, wordBoundaryUrl}) => {
-	const text = _.split(subtitle, ' ')
+export const SubtitleWordByWord = ({playbackRate, wordBoundaryUrl}) => {
 
 	const [handle] = useState(() => delayRender());
 	const [wordBoundary, setWordBoundary] = useState([]);
-	const [textArray, setTextArray] = useState([]);
-
-	function isNumeric(str) {
-		if (typeof str !== "string") return false // We only process strings!  
-		return !isNaN(str) && // Use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-					 !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-	}
 
 	const fetchWordBoundary = useCallback(async () => {
 		const data = await fetch(wordBoundaryUrl).then(response => response.json());
@@ -31,15 +23,6 @@ export const SubtitleWordByWord = ({subtitle, playbackRate, wordBoundaryUrl}) =>
 		});
 		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
 
-		// Adding numbers to text
-		// const numberText = _.filter(text, t => !isNaN(parseInt(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, ''), 10)));
-		// _.map(numberText, p => {
-		// 	const index = _.indexOf(text, p);
-		// 	text[index+1] = text[index] + " " + text[index + 1]
-		// });
-		// const parsedText = _.filter(text, t => !isNumeric(_.replace(t,/[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '')));
-
-		setTextArray(text);
 		setWordBoundary(parsedData);
 
 		continueRender(handle);
@@ -64,11 +47,11 @@ export const SubtitleWordByWord = ({subtitle, playbackRate, wordBoundaryUrl}) =>
 			>
 				{wordBoundary.length > 0 && 
 					<>
-						{textArray.map((t, i) => {
-							const from = Math.round(_.get(wordBoundary[i], 'privAudioOffset', 0)/100000*.3/playbackRate);
-							const duration = Math.round(_.get(wordBoundary[i], 'privDuration', 1)/100000*.3/playbackRate);
+						{wordBoundary.map((word, i) => {
+							const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
+							const duration = Math.round(_.get(word, 'privDuration', 1)/100000*.3/playbackRate);
 							return (
-								<Sequence from={from} durationInFrames={duration} name={t}>
+								<Sequence from={from} durationInFrames={duration} name={word.privText}>
 									<span
 										key={wordBoundary[i]}
 										style={{
@@ -81,7 +64,7 @@ export const SubtitleWordByWord = ({subtitle, playbackRate, wordBoundaryUrl}) =>
 											display: 'inline-block',
 										}}
 									>
-										{t}
+										{word.privText}
 									</span>
 								</Sequence>
 							);
