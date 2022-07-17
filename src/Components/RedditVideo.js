@@ -10,11 +10,23 @@ import video from '../../mp4/sonic_generations.mp4';
 
 const RedditVideo = (props) => {
   const {
-    post, postAudioUrl, postAudioDuration,
-    comments, commentAudioUrls, commentAudioDurations, commentWordBoundaryUrls,
-    selfTextArray, selfTextAudioUrls, selfTextAudioDurations, selfTextWordBoundaryUrls,
+    post,
+    comments,
+    selfText,
     redditVideo, redditAudio, videoDuration, playbackRate, videoStart
   } = props;
+
+  const postAudioDuration = _.get(post, 'postAudioDuration', 1);
+  const postAudioUrl = _.get(post, 'postAudioUrl', '');
+  const commentArray = _.get(comments, 'comments', []);
+  const commentAudioUrls = _.get(comments, 'commentAudioUrls', []);
+  const commentAudioDurations = _.get(comments, 'commentAudioDurations', [1]);
+  const commentWordBoundaryUrls = _.get(comments, 'commentWordBoundaryUrls', []);
+  const selfTextArray = _.get(selfText, 'selfTextArray', []);
+  const selfTextAudioUrls = _.get(selfText, 'selfTextAudioUrls', []);
+  const selfTextAudioDurations = _.get(selfText, 'selfTextAudioDurations', [1]);
+  const selfTextWordBoundaryUrls = _.get(selfText, 'selfTextWordBoundaryUrls', []);
+
 
   const generateCommentSequence = (comment, audioDurations, audioUrls, wordBoundaryUrls) => {
     return _.map(comment.bodyArray, (text, i) => {
@@ -52,7 +64,7 @@ const RedditVideo = (props) => {
           !_.isEmpty(post) &&
           <RedditPost post={post} />
         }
-        {postAudioUrl.length > 0 ? <Audio src={postAudioUrl} playbackRate={playbackRate}/> : <></>}
+        {postAudioUrl?.length > 0 ? <Audio src={postAudioUrl} playbackRate={playbackRate}/> : <></>}
         </Series.Sequence>
         {selfTextArray.length > 0 && 
           _.map(selfTextArray, (text, i) => {
@@ -73,8 +85,8 @@ const RedditVideo = (props) => {
             {redditAudio.length > 0 && <Audio src={redditAudio}/>}
           </Series.Sequence>
         }
-        {comments.length > 0 &&
-          _.map(comments, (comment, i) => {
+        {commentArray.length > 0 &&
+          _.map(commentArray, (comment, i) => {
             return _.get(comment, 'bodyArray', false)
             ? generateCommentSequence(
               comment, commentAudioDurations[i],

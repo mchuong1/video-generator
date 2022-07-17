@@ -11,8 +11,8 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="vywakc",
-		commentIds="ig599ec",
+		postId="vxk50h",
+		commentIds="",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -22,17 +22,8 @@ export const RemotionVideo = () => {
 
 	const [handle] = useState(() => delayRender());
 	const [post, setPost] = useState({});
-	const [postAudioUrl, setPostAudioUrl] = useState('');
-  const [postAudioDuration, setPostAudioDuration] = useState(1);
-	const [postWordBoundaryUrl, setPostWordBoundaryUrl] = useState('');
-	const [selfTextArray, setSelfTextArray] = useState([]);
-	const [selfTextAudioUrls, setSelfTextAudioUrls] = useState([]);
-  const [selfTextAudioDurations, setSelfTextAudioDurations] = useState([1]);
-	const [selfTextWordBoundaryUrls, setSelfTextWordBoundaryUrls] = useState([]);
+	const [selfText, setSelfText] = useState({});
 	const [comments, setComments] = useState([]);
-	const [commentAudioUrls, setCommentAudioUrls] = useState([]);
-  const [commentAudioDurations, setCommentAudioDurations] = useState([1]);
-	const [commentWordBoundaryUrls, setCommentWordBoundaryUrls] = useState([]);
 	const [videoDuration, setVideoDuration] = useState(1);
 
 	const getAudioUrls = useCallback(async (textArray) => {
@@ -53,10 +44,7 @@ export const RemotionVideo = () => {
 
     const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(replaceBadWords(title), voice);
     const duration = await getAudioDurationInSeconds(postAudioUrl);
-		setPost(post);
-		setPostAudioUrl(postAudioUrl);
-		setPostAudioDuration(duration);
-		setPostWordBoundaryUrl(postWordBoundaryUrl);
+		setPost({...post, postAudioUrl, postAudioDuration: duration, postWordBoundaryUrl});
 
     if(selftext.length > 0) {
       const noUrlSelfText = removeUrl(selftext);
@@ -65,10 +53,7 @@ export const RemotionVideo = () => {
       
       const { ttsUrl: selfTextAudioUrls, wordBoundaryUrl } = await getAudioUrls(filteredSelfTextArray);
       const selfTextAudioDurations = await getAudioDurations(selfTextAudioUrls);
-			setSelfTextArray(filteredSelfTextArray);
-			setSelfTextAudioUrls(selfTextAudioUrls);
-      setSelfTextAudioDurations(selfTextAudioDurations);
-			setSelfTextWordBoundaryUrls(wordBoundaryUrl);
+			setSelfText({selfTextArray: filteredSelfTextArray, selfTextAudioUrls, selfTextAudioDurations, selfTextWordBoundaryUrls: wordBoundaryUrl});
     }
 
 		if(commentIds.length > 0) {
@@ -85,10 +70,7 @@ export const RemotionVideo = () => {
 			});
 			const {ttsUrl: commentAudioUrls, wordBoundaryUrl} = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : comment.body));
 			const commentAudioDurations = await getAudioDurations(commentAudioUrls);
-			setComments(parsedComments);
-			setCommentAudioUrls(commentAudioUrls);
-			setCommentAudioDurations(commentAudioDurations);
-			setCommentWordBoundaryUrls(wordBoundaryUrl);
+			setComments({comments: parsedComments, commentAudioUrls, commentAudioDurations, commentWordBoundaryUrls: wordBoundaryUrl});
 		}
 
 		if(redditVideo.length > 0) {
@@ -100,8 +82,8 @@ export const RemotionVideo = () => {
 	}, [handle, postId, commentIds, redditVideo, voice, getAudioUrls, getAudioDurations]);
 
 	const totalDuration = () => {
-		const selfTextPlusVideoDuration = Math.ceil((_.sum(selfTextAudioDurations) > 1 ? _.sum(selfTextAudioDurations) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
-		return Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / playbackRate + selfTextPlusVideoDuration);
+		const selfTextPlusVideoDuration = Math.ceil((_.sum(_.get(selfText, 'selfTextAudioDurations', [1])) > 1 ? _.sum(_.get(selfText, 'selfTextAudioDurations', [1])) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
+		return Math.ceil(_.sum(_.flatten([_.get(post, 'postAudioDuration', 1), ..._.get(comments, 'commentAudioDurations', [1])])) * 30 / playbackRate + selfTextPlusVideoDuration);
 	}
 
 	useEffect(() => {
@@ -119,19 +101,8 @@ export const RemotionVideo = () => {
 				height={1920}
 				defaultProps={{
 					post,
-					postId,
-					postAudioUrl,
-					postAudioDuration,
-					postWordBoundaryUrl,
-					selfTextArray,
-					selfTextAudioUrls,
-					selfTextAudioDurations,
-					selfTextWordBoundaryUrls,
+					selfText,
 					comments,
-					commentIds,
-					commentAudioUrls,
-					commentAudioDurations,
-					commentWordBoundaryUrls,
 					redditVideo,
 					redditAudio,
 					videoDuration,
