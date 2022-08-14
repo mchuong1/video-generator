@@ -11,13 +11,13 @@ export const RemotionVideo = () => {
 
 	const props = getInputProps();
 	const {
-		postId="w0ambs",
-		commentIds="igdg62a,igdg0zl,igd94qd,igdmw7v,igdkwjk",
+		postId="wnr2l6",
+		commentIds="ik7oe64,ik6va9c,ik7c6vg,ik77haf,ik6qeya,ik6pypx,ik7g3k5",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
-		playbackRate=1.25,
-		videoStart=902,
+		playbackRate=1.5,
+		videoStart=1124,
 		videoUrl=""
 	} = props;
 
@@ -43,7 +43,7 @@ export const RemotionVideo = () => {
 		const post = await getRedditPost(postId);
     const { title, selftext } = post;
 
-    const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(replaceBadWords(title), voice);
+    const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(title, voice);
     const duration = await getAudioDurationInSeconds(postAudioUrl);
 		setPost({...post, postAudioUrl, postAudioDuration: duration, postWordBoundaryUrl});
 

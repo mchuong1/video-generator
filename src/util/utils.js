@@ -29,6 +29,7 @@ export const replaceBadWords = string => {
   .replace(/([bB][iI][tT][cC][hH])/g, 'bish').replace(/([dD][aA][mM][nN])/g, 'dang').replace(/([bB][aA][sS][tT][aA][rR][dD])/g, 'dog')
   .replace(/([pP][iI][sS][sS])/g, 'pee').replace(/([dD][iI][cC][kK])/g, 'sausage').replace(/([aA][sS][sS])/g, 'ass').replace(/[pP][oO][rR][Nn]/g, 'corn')
   .replace(/[vV][aA][gG][iI][nN][aA]/g, 'v-card').replace(/[pP][rR][Oo][sS][tT][iI][tT][uU][tT][eE]/g, 'adult fun time').replace(/[kK][iI][lL][lL]/g, 'unalive')
-  .replace(/[lL][sS][dD]/g, 'drug');
+  .replace(/[lL][sS][dD]/g, 'drug').replace(/[cC][uU][mM]/g, 'came').replace(/[pP][uU][sS][sS][yY]/g, 'kitty').replace(/[tT][iI][tT]/g, 'melon')
+  .replace(/[bB][oO][nN][eE][rR]/g, 'stiffy');
   return parsedString;
 }
