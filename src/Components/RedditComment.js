@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
 import { getRedditUserIcon } from '../service/service';
 import { continueRender, delayRender, Img, Sequence } from 'remotion';
-import { replaceBadWords } from '../util/utils';
+import { replaceBadWords, removeUrl } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -67,8 +67,20 @@ const useStyles = makeStyles(() => ({
     fontFamily: 'Noto Sans, Arial, sans-serif',
     fontWeight: 500,
     fontSize: '40px',
-    lineHeight: '48px'
-  }
+    lineHeight: '48px',
+    // position: 'absolute',
+    // top: '48rem',
+    // left: '5rem',
+    // width: '800px',
+    // opacity: '99%'
+  },
+  // word: {
+  //   WebkitTextStrokeColor: 'black',
+  //   WebkitTextStrokeWidth: '5px',
+  //   fontSize: '70px',
+  //   color: 'white',
+  //   textShadow: '0px 0px 12px #000000'
+  // }
 }));
 
 const RedditComment = (props) => {
@@ -139,7 +151,7 @@ const RedditComment = (props) => {
               const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
               return (
                 <Sequence from={from} layout="none">
-                  <span>
+                  <span className={classes.word}>
                     {replaceBadWords(word.privText) + ' '}
                   </span>
                 </Sequence>

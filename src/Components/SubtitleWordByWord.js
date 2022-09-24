@@ -40,36 +40,36 @@ export const SubtitleWordByWord = ({playbackRate, wordBoundaryUrl}) => {
 					fontWeight: 'bold',
 					fontSize: 100,
 					textAlign: 'center',
-					position: 'absolute',
+					// position: 'absolute',
 					bottom: '75rem',
 					width: '100%',
 				}}
 			>
 				{wordBoundary.length > 0 && 
-					<>
+					<div>
 						{wordBoundary.map((word, i) => {
 							const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
 							const duration = Math.round(_.get(word, 'privDuration', 1)/100000*.3/playbackRate);
 							return (
-								<Sequence from={from} durationInFrames={duration} name={word.privText}>
-									<span
-										key={wordBoundary[i]}
-										style={{
-											color: 'white',
-											marginLeft: 10,
-											marginRight: 10,
-											width: '100%',
-											WebkitTextStrokeColor: 'black',
-											WebkitTextStrokeWidth: '5px',
-											display: 'inline-block',
-										}}
-									>
-										{word.privText}
-									</span>
-								</Sequence>
+									<Sequence from={from} name={word.privText} style={{ position: 'initial' }}>
+										<span
+											key={wordBoundary[i]}
+											style={{
+												color: 'white',
+												marginLeft: 10,
+												marginRight: 10,
+												width: '100%',
+												WebkitTextStrokeColor: 'black',
+												WebkitTextStrokeWidth: '5px',
+												display: 'inline-block',
+											}}
+										>
+											{word.privText + " "}
+										</span>
+									</Sequence>
 							);
 						})}
-					</>
+					</div>
 				}
 			</h1>
 		</>

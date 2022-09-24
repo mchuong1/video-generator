@@ -23,8 +23,18 @@ const useStyles = makeStyles(() => ({
     fontFamily: 'Noto Sans, Arial, sans-serif',
     fontWeight: 500,
     fontSize: '40px',
-    lineHeight: '48px'
-  }
+    lineHeight: '48px',
+    // position: 'absolute',
+    // top: '48rem',
+    // left: '5rem',
+  },
+  // word: {
+  //   WebkitTextStrokeColor: 'black',
+  //   WebkitTextStrokeWidth: '5px',
+  //   fontSize: '70px',
+  //   color: 'white',
+  //   textShadow: '0px 0px 12px #000000'
+  // }
 }))
 
 const SelfText = (props) => {
@@ -62,7 +72,7 @@ const SelfText = (props) => {
             const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
             return (
               <Sequence from={from} layout="none">
-                <span>
+                <span className={classes.word}>
                   {replaceBadWords(word.privText) + ' '}
                 </span>
               </Sequence>

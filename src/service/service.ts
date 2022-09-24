@@ -11,16 +11,25 @@ const r = new snoowrap({
 export const getRedditPost = (
   postId: string
 ): Promise<object> => {
-  const result = r.getSubmission(postId)
+  try {
+    const result = r.getSubmission(postId)
     .expandReplies({limit: 1, depth: 0});
-  return result;
+    return result;
+  } catch (e: unknown) {
+    console.log(e)
+  }
 }
 
 export const getSubredditIcon = (
   subreddit: string
 ): string => {
-  const result = r.getSubreddit(subreddit)
-  return result.community_icon;
+  try {
+    const result = r.getSubreddit(subreddit)
+    return result.community_icon;
+  } catch (e: unknown) {
+    console.log(e)
+    return `${e}`
+  }
 }
 
 export const getRedditUserIcon = async (

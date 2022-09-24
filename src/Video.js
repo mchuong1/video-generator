@@ -3,21 +3,20 @@ import { textToSpeech } from './TextToSpeech';
 import { getRedditPost } from './service/service';
 import RedditVideo from './Components/RedditVideo';
 import { useEffect, useState, useCallback } from 'react';
-import { removeUrl, findComment, replaceBadWords } from './util/utils';
+import { removeUrl, findComment, convertAcronyms } from './util/utils';
 import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
 import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
 
 export const RemotionVideo = () => {
-
 	const props = getInputProps();
 	const {
-		postId="wnr2l6",
-		commentIds="ik7oe64,ik6va9c,ik7c6vg,ik77haf,ik6qeya,ik6pypx,ik7g3k5",
+		postId="siyvqx",
+		commentIds="hvd4ld8,hvbte12",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
 		playbackRate=1.5,
-		videoStart=1124,
+		videoStart=35,
 		videoUrl=""
 	} = props;
 
@@ -43,13 +42,13 @@ export const RemotionVideo = () => {
 		const post = await getRedditPost(postId);
     const { title, selftext } = post;
 
-    const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(title, voice);
+    const {ttsUrl: postAudioUrl, wordBoundaryUrl: postWordBoundaryUrl } = await textToSpeech(convertAcronyms(title), voice);
     const duration = await getAudioDurationInSeconds(postAudioUrl);
 		setPost({...post, postAudioUrl, postAudioDuration: duration, postWordBoundaryUrl});
 
     if(selftext.length > 0) {
       const noUrlSelfText = removeUrl(selftext);
-      const selfTextArray = noUrlSelfText.replace(/([.?!])\s*(?=[a-zA-Z])/g, "$1|").split("|");
+      const selfTextArray = noUrlSelfText.replace(/([.?!])\s*(?=[a-zA-Z"])/g, "$1|").split("|");
       const filteredSelfTextArray = _.filter(selfTextArray, string => !_.isEmpty(string));
       
       const { ttsUrl: selfTextAudioUrls, wordBoundaryUrl } = await getAudioUrls(filteredSelfTextArray);
@@ -69,7 +68,7 @@ export const RemotionVideo = () => {
 				}
 				return comment;
 			});
-			const {ttsUrl: commentAudioUrls, wordBoundaryUrl} = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : comment.body));
+			const {ttsUrl: commentAudioUrls, wordBoundaryUrl} = await getAudioUrls(_.map(parsedComments, comment => _.get(comment, 'bodyArray', false) ? comment.bodyArray : removeUrl(comment.body)));
 			const commentAudioDurations = await getAudioDurations(commentAudioUrls);
 			setComments({comments: parsedComments, commentAudioUrls, commentAudioDurations, commentWordBoundaryUrls: wordBoundaryUrl});
 		}

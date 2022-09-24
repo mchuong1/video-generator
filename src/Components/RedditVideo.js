@@ -1,15 +1,16 @@
 import _ from 'lodash';
 import React , { useState, useEffect, useCallback } from 'react';
 import {
-  AbsoluteFill, Series,
+  AbsoluteFill, Series, staticFile,
   Audio, OffthreadVideo, delayRender, continueRender
 } from "remotion";
 import SelfText from './Selftext';
 import RedditPost from './RedditPost';
 import RedditComment from './RedditComment';
-import video from '../../mp4/sonic_generations.mp4';
-import { SubtitleWordByWord } from "./SubtitleWordByWord";
+import video from '../../mp4/sonic_adventure.webm';
 import { getVideoMetadata } from '@remotion/media-utils';
+import { FollowForMore } from './FollowForMore';
+import { SubtitleWordByWord } from './SubtitleWordByWord';
 
 const RedditVideo = (props) => {
   const {
@@ -17,6 +18,8 @@ const RedditVideo = (props) => {
     videoUrl, redditVideo, redditAudio,
     videoDuration, playbackRate, videoStart
   } = props;
+
+  // const video = staticFile('/sonic_unleashed_windmill.webm');
 
   const [handle] = useState(() => delayRender());
   const [shouldScale, setShouldScale] = useState(true);
@@ -70,10 +73,10 @@ const RedditVideo = (props) => {
   return (
     <AbsoluteFill>
       <OffthreadVideo
+        muted
         src={videoUrl.length > 0 ? videoUrl : video}
         style={{ transform: `${shouldScale ? 'scale(3.5) translate(0px, 160px)' : ''}` }}
         startFrom={videoStart*30}
-        volume={0}
       />
       <Series>
         <Series.Sequence durationInFrames={Math.ceil(postAudioDuration * 30/playbackRate)}>
@@ -88,20 +91,12 @@ const RedditVideo = (props) => {
             return(
               <Series.Sequence key={text} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/playbackRate)}>
                 <>
-                  {/* <SelfText playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} /> */}
-                  <SubtitleWordByWord playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} />
+                  <SelfText playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} />
                   <Audio src={selfTextAudioUrls[i]} playbackRate={playbackRate}/>
                 </>
               </Series.Sequence>
             )
           })
-        }
-        {
-          redditVideo.length > 0 && 
-          <Series.Sequence durationInFrames={Math.ceil(videoDuration * 30)}>
-            <OffthreadVideo src={redditVideo} style={{ zIndex: 5, height: 'fit-content', width: 'inherit', alignSelf: 'center' }}/>
-            {redditAudio.length > 0 && <Audio src={redditAudio}/>}
-          </Series.Sequence>
         }
         {commentArray.length > 0 &&
           _.map(commentArray, (comment, i) => {
@@ -117,6 +112,13 @@ const RedditVideo = (props) => {
             </Series.Sequence>
             );
           })
+        }
+        {
+          redditVideo.length > 0 && 
+          <Series.Sequence durationInFrames={Math.ceil(videoDuration * 30)}>
+            <OffthreadVideo src={redditVideo} startFrom={120 * 30} style={{ zIndex: 5, height: 'fit-content', width: 'inherit', alignSelf: 'center' }}/>
+            {redditAudio.length > 0 && <Audio src={redditAudio}/>}
+          </Series.Sequence>
         }
       </Series>
     </AbsoluteFill>
