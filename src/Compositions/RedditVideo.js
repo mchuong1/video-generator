@@ -4,13 +4,11 @@ import {
   AbsoluteFill, Series, staticFile,
   Audio, OffthreadVideo, delayRender, continueRender
 } from "remotion";
-import SelfText from './Selftext';
-import RedditPost from './RedditPost';
-import RedditComment from './RedditComment';
-import video from '../../mp4/sonic_adventure.webm';
+import SelfText from '../Components/Selftext';
+import RedditPost from '../Components/RedditPost';
+import RedditComment from '../Components/RedditComment';
+import video from '../../mp4/sonic_generations.mp4';
 import { getVideoMetadata } from '@remotion/media-utils';
-import { FollowForMore } from './FollowForMore';
-import { SubtitleWordByWord } from './SubtitleWordByWord';
 
 const RedditVideo = (props) => {
   const {
@@ -55,7 +53,7 @@ const RedditVideo = (props) => {
       ? (
         <Series.Sequence durationInFrames={durationInFrames} name={comment.id}>
           <>
-            <RedditComment comment={comment} wordBoundaryUrl={wordBoundaryUrls[i]} playbackRate={playbackRate}/>
+            <RedditComment byWord comment={comment} wordBoundaryUrl={wordBoundaryUrls[i]} playbackRate={playbackRate}/>
             <Audio src={audioUrls[i]} playbackRate={playbackRate}/>
           </>
         </Series.Sequence>
@@ -87,7 +85,7 @@ const RedditVideo = (props) => {
         {postAudioUrl?.length > 0 ? <Audio src={postAudioUrl} playbackRate={playbackRate}/> : <></>}
         </Series.Sequence>
         {selfTextArray.length > 0 && 
-          _.map(selfTextArray, (text, i) => {
+          _.map(_.slice(selfTextArray, 0, 20), (text, i) => {
             return(
               <Series.Sequence key={text} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/playbackRate)}>
                 <>
@@ -107,7 +105,7 @@ const RedditVideo = (props) => {
             )
             : (
             <Series.Sequence durationInFrames={Math.ceil(commentAudioDurations[i] * 30/playbackRate)} name={comment.id}>
-              <RedditComment comment={comment} wordBoundaryUrl={commentWordBoundaryUrls[i]} playbackRate={playbackRate}/>
+              <RedditComment byWord comment={comment} wordBoundaryUrl={commentWordBoundaryUrls[i]} playbackRate={playbackRate} />
               <Audio src={commentAudioUrls[i]} playbackRate={playbackRate}/>
             </Series.Sequence>
             );

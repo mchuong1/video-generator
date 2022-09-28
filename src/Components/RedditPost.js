@@ -5,7 +5,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import { makeStyles } from '@mui/styles';
 import React, { useCallback, useEffect, useState } from 'react';
-import { continueRender, delayRender, Img } from 'remotion';
+import {
+  continueRender, delayRender, Img, spring,
+  useVideoConfig, useCurrentFrame, interpolate,
+} from 'remotion';
 import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
@@ -38,7 +41,7 @@ const useStyles = makeStyles(() => ({
     fontSize: '40px',
     lineHeight: '48px',
     fontWeight: '500',
-    marginBottom: '10px'
+    marginBottom: '10px',
   },
   awardsbar: {
     fontFamily: 'IBMPlexSans, Arial, sans-serif',
@@ -78,14 +81,34 @@ const useStyles = makeStyles(() => ({
     width: 'fit-content',
     borderRadius: '15px',
     padding: '1px 7px'
+  },
+  word: {
+    '& span': {
+      display: 'inline',
+    },
+    display: 'inline-block'
+  },
+  spacedWord: {
+    '& span': {
+      display: 'inline',
+    },
+    display: 'inline-block',
+    marginRight: '10px'
   }
 }))
 
 const RedditPost = (props) => {
-  const { post } = props;
+  const { post, playbackRate, isAnimated } = props;
   const classes = useStyles();
   const [handle] = useState(() => delayRender());
   const [communityIcon, setCommunityIcon] = useState('');
+  const [wordBoundary, setWordBoundary] = useState([]);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const duration = _.get(post, 'postAudioDuration', 1);
+  const wordBoundaryUrl = _.get(post, 'postWordBoundaryUrl', '');
+  const regexExp = /[!'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g;
 
   const {
     title, author,
@@ -97,13 +120,36 @@ const RedditPost = (props) => {
     all_awardings: allAwards,
   } = post
 
+  const enter = spring({
+    frame,
+    fps,
+    config: {
+      stiffness: 1000,
+      overshootClamping: true,
+    },
+  });
+
+  const exit = spring({
+    frame: frame - (duration*30/playbackRate),
+    fps,
+    config: {
+      stiffness: 600,
+      overshootClamping: true,
+    },
+  });
+
+  const enterAndExit = interpolate(enter, [0,.5], [-2000, 0], { extrapolateRight: 'clamp' }) + interpolate(exit, [0,1], [0,2000])
+
   const fetchData = useCallback(async() => {
-    const data = await getSubredditIcon(subreddit.display_name);
+    const communityIconData = await getSubredditIcon(subreddit.display_name);
+    setCommunityIcon(communityIconData);
 
-    setCommunityIcon(data);
+    const data = await fetch(wordBoundaryUrl).then(response => response.json());
+    console.log(data)
 
+		setWordBoundary(data);
     continueRender(handle);
-  }, [handle, subreddit])
+  }, [handle, subreddit, wordBoundaryUrl])
 
   useEffect(() => {
     fetchData();
@@ -111,7 +157,7 @@ const RedditPost = (props) => {
 
   return (
     <>
-      <Paper classes={{ root: classes.paper }}>
+      <div className={classes.paper} style={{ transform: `translateX(${isAnimated ? enterAndExit : 0}px)` }}>
         <div className={classes.headerbar}>
           {
             communityIcon !== '' &&
@@ -132,7 +178,35 @@ const RedditPost = (props) => {
           ))}
         </div>
         }
-        <div className={classes.title}>{replaceBadWords(title)}</div>
+        <div className={classes.title}>
+          {isAnimated ?
+            _.map(wordBoundary, (word, i) => {
+              const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
+              const scale = spring({
+                frame: frame - from,
+                fps,
+                config: {
+                  stiffness: 600,
+                  overshootClamping: true,
+                },
+                durationInFrames: 15
+              });
+              let testWord
+              if (i < wordBoundary.length - 1)
+                testWord = !regexExp.test(wordBoundary[i+1].privText)
+              else
+                testWord = true
+              return (
+                <div className={testWord ? classes.spacedWord : classes.word} style={{ transform: `scale(${scale})` }}>
+                  <span>
+                    {word.privText}
+                  </span>
+                </div>
+              )
+            })
+            : replaceBadWords(title)
+          }
+        </div>
         {!_.isEmpty(linkFlairText) && 
           <div
             className={classes.linkFlair}
@@ -146,13 +220,20 @@ const RedditPost = (props) => {
               NSFW
           </div>
         }
-      </Paper>
+      </div>
     </>
   )
 }
 
 RedditPost.propTypes = {
   post: PropTypes.shape({}).isRequired,
+  playbackRate: PropTypes.number,
+  isAnimated: PropTypes.bool,
+}
+
+RedditPost.defaultProps = {
+  isAnimated: false,
+  playbackRate: 1.5
 }
 
 export default RedditPost;

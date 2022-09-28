@@ -68,23 +68,11 @@ const useStyles = makeStyles(() => ({
     fontWeight: 500,
     fontSize: '40px',
     lineHeight: '48px',
-    // position: 'absolute',
-    // top: '48rem',
-    // left: '5rem',
-    // width: '800px',
-    // opacity: '99%'
-  },
-  // word: {
-  //   WebkitTextStrokeColor: 'black',
-  //   WebkitTextStrokeWidth: '5px',
-  //   fontSize: '70px',
-  //   color: 'white',
-  //   textShadow: '0px 0px 12px #000000'
-  // }
+  }
 }));
 
 const RedditComment = (props) => {
-  const { comment, wordBoundaryUrl, playbackRate } = props;
+  const { comment, wordBoundaryUrl, playbackRate, byWord } = props;
   const classes = useStyles(props);
   const {
     author, created,
@@ -94,6 +82,7 @@ const RedditComment = (props) => {
   const [handle] = useState(() => delayRender());
   const [userIcon, setUserIcon] = useState('');
   const [wordBoundary, setWordBoundary] = useState([]);
+  const regexExp = /[!'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g;
 
 
   const fetchData = useCallback(async() => {
@@ -105,16 +94,14 @@ const RedditComment = (props) => {
 
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
 
-		// Adding punction values to text
-		const punctuation = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~][...]/g, '').length === 0);
-		_.map(punctuation, p => {
-			const index = _.indexOf(data, p)
-			data[index-1].privDuration = data[index-1].privDuration + data[index].privDuration;
-			data[index-1].privText = data[index-1].privText + data[index].privText;
-		});
-		const parsedData = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g, '').length > 0);
-
-		setWordBoundary(parsedData);
+		// // Adding punction values to text
+		// const punctuation = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~][...]/g, '').length === 0);
+		// _.map(punctuation, p => {
+		// 	const index = _.indexOf(data, p)
+		// 	data[index-1].privDuration = data[index-1].privDuration + data[index].privDuration;
+		// 	data[index-1].privText = data[index-1].privText + data[index].privText;
+		// });
+		setWordBoundary(data);
     continueRender(handle);
   }, [handle, author, wordBoundaryUrl]);
 
@@ -147,15 +134,27 @@ const RedditComment = (props) => {
         }
         <div className={classes.body}>
           {
-            _.map(wordBoundary, word => {
+            _.map(wordBoundary, (word, i) => {
               const from = Math.round(_.get(word, 'privAudioOffset', 0)/100000*.3/playbackRate);
+              let testWord
+              if (i < wordBoundary.length - 1)
+                testWord = regexExp.test(wordBoundary[i+1].privText) ? replaceBadWords(word.privText) : replaceBadWords(word.privText) + ' ';
+              else
+                testWord = replaceBadWords(word.privText) + ' ';
+              if (byWord)
+                return (
+                  <Sequence from={from} layout="none">
+                    <span className={classes.word}>
+                      {testWord}
+                    </span>
+                  </Sequence>
+                )
               return (
-                <Sequence from={from} layout="none">
-                  <span className={classes.word}>
-                    {replaceBadWords(word.privText) + ' '}
-                  </span>
-                </Sequence>
-            )})
+                <span className={classes.word}>
+                  {replaceBadWords(word.privText) + ' '}
+                </span>
+              )
+            })
           }
         </div>
       </Paper>
@@ -169,7 +168,7 @@ RedditComment.propTypes = {
 };
 
 RedditComment.defaulProps = {
-  isMulti: false
+  byWord: false,
 }
 
 export default RedditComment;

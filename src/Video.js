@@ -1,22 +1,24 @@
 import _ from 'lodash';
 import { textToSpeech } from './TextToSpeech';
 import { getRedditPost } from './service/service';
-import RedditVideo from './Components/RedditVideo';
+import RedditVideo from './Compositions/RedditVideo';
 import { useEffect, useState, useCallback } from 'react';
 import { removeUrl, findComment, convertAcronyms } from './util/utils';
 import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
 import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
+import FancyRedditVideo from './Compositions/FancyRedditVideo';
 
 export const RemotionVideo = () => {
 	const props = getInputProps();
 	const {
-		postId="siyvqx",
-		commentIds="hvd4ld8,hvbte12",
+		postId="xfcbr4",
+		commentIds="",
+		// iomnbun,ioniu74,iome917,iomf4kg,ion3nwq,iomyfh7
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
 		playbackRate=1.5,
-		videoStart=35,
+		videoStart=216,
 		videoUrl=""
 	} = props;
 
@@ -95,6 +97,25 @@ export const RemotionVideo = () => {
 			<Composition
 				id="RedditVideo"
 				component={RedditVideo}
+				durationInFrames={totalDuration()}
+				fps={30}
+				width={1080}
+				height={1920}
+				defaultProps={{
+					post,
+					selfText,
+					comments,
+					redditVideo,
+					redditAudio,
+					videoDuration,
+					playbackRate,
+					videoStart,
+					videoUrl
+				}}
+			/>
+			<Composition
+				id="FancyRedditVideo"
+				component={FancyRedditVideo}
 				durationInFrames={totalDuration()}
 				fps={30}
 				width={1080}

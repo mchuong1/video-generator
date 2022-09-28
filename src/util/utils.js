@@ -6,7 +6,7 @@ export const removeUrl = (string) => {
   // eslint-disable-next-line no-useless-escape
   const noChineseChars = _.replace(noRemoved, /[^a-zA-Z\d\s,’.?!\(\)‘"'”\-“\[\]]+/g, '');
   // const noDisclaimer = _.replace(noChineseChars, /\(.*\)/g, '');
-  const noEdit = _.replace(noChineseChars, /[eE][dD][iI][tT]:.*/g, '');
+  const noEdit = _.replace(noChineseChars, /[eE][dD][iI][tT].*/g, '');
   return noEdit;
 }
 
@@ -37,7 +37,7 @@ export const replaceBadWords = string => {
   .replace(/[vV][aA][gG][iI][nN][aA]/g, 'v-card').replace(/[pP][rR][Oo][sS][tT][iI][tT][uU][tT][eE]/g, 'adult fun time').replace(/[kK][iI][lL][lL]/g, 'unalive')
   .replace(/[lL][sS][dD]/g, 'drug').replace(/[pP][uU][sS][sS][yY]/g, 'kitty').replace(/[mM][uU][rR][dD][eE][Rr]/g, 'unalive')
   .replace(/[bB][oO][nN][eE][rR]/g, 'stiffy')
-  // .replace(/[aA][sS][sS]/g, 'butt')
+  .replace(/[aA][sS][sS]/g, 'butt')
   .replace(/[mM][aA][sS][tT][uU][rR][bB][aA][tT]/g, 'jerk');
   // .replace(/[dD][iI][eE]/g, 'unalive')
   // .replace(/[cC][uU][mM]/g, 'came')
