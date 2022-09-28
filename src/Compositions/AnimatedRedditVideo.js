@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  AbsoluteFill, Series, staticFile,
+  AbsoluteFill, Series,
   Audio, OffthreadVideo, delayRender, continueRender
 } from "remotion";
 import SelfText from '../Components/Selftext';
@@ -10,7 +10,7 @@ import RedditComment from '../Components/RedditComment';
 import video from '../../mp4/sonic_generations.mp4';
 import { getVideoMetadata } from '@remotion/media-utils';
 
-const FancyRedditVideo = (props) => {
+const AnimatedRedditVideo = (props) => {
   const {
     post, comments, selfText,
     videoUrl, redditVideo, redditAudio,
@@ -32,7 +32,6 @@ const FancyRedditVideo = (props) => {
   const selfTextAudioDurations = _.get(selfText, 'selfTextAudioDurations', [1]);
   const selfTextWordBoundaryUrls = _.get(selfText, 'selfTextWordBoundaryUrls', []);
 
-
   const fetchVideoData = useCallback(async () => {
     if(videoUrl.length > 0 ) {
       const { height, width } = await getVideoMetadata(videoUrl); 
@@ -47,18 +46,33 @@ const FancyRedditVideo = (props) => {
 
   const generateCommentSequence = (comment, audioDurations, audioUrls, wordBoundaryUrls) => {
     return _.map(comment.bodyArray, (text, i) => {
-      const durationInFrames = Math.ceil(audioDurations[i] * 30 / playbackRate);
+      const durationInFrames = Math.ceil((audioDurations[i]) * 30 / playbackRate);
       return i === 0
       ? (
+        <Series.Sequence durationInFrames={durationInFrames+5} name={comment.id}>
           <>
-            <RedditComment comment={comment} wordBoundaryUrl={wordBoundaryUrls[i]} playbackRate={playbackRate}/>
+            <RedditComment
+              isAnimated
+              comment={comment}
+              wordBoundaryUrl={wordBoundaryUrls[i]}
+              playbackRate={playbackRate}
+              duration={durationInFrames}
+            />
             <Audio src={audioUrls[i]} playbackRate={playbackRate}/>
           </>
+        </Series.Sequence>
       ) : (
+        <Series.Sequence durationInFrames={durationInFrames+5}>
           <>
-            <SelfText wordBoundaryUrl={wordBoundaryUrls[i]} playbackRate={playbackRate} />
+            <SelfText
+              isAnimated
+              wordBoundaryUrl={wordBoundaryUrls[i]}
+              playbackRate={playbackRate}
+              duration={durationInFrames}
+            />
             <Audio src={audioUrls[i]} playbackRate={playbackRate}/>
           </>
+        </Series.Sequence>
       )
     });
   }
@@ -71,15 +85,26 @@ const FancyRedditVideo = (props) => {
         style={{ transform: `${shouldScale ? 'scale(3.5) translate(0px, 160px)' : ''}` }}
         startFrom={videoStart*30}
       />
-      {
-        !_.isEmpty(post) && (
-          <>
-            <RedditPost isAnimated post={post} wordBoundaryUrl={postWordBoundaryUrl} playbackRate={playbackRate} />
+      <Series>
+        { !_.isEmpty(post) &&
+          <Series.Sequence durationInFrames={Math.ceil((postAudioDuration + .5) * 30/playbackRate)}>
+            <RedditPost isAnimated post={post} wordBoundaryUrl={postWordBoundaryUrl} />
             <Audio src={postAudioUrl} playbackRate={playbackRate}/>
-          </>
-        )
-      }
-      {commentArray.length > 0 &&
+          </Series.Sequence>
+        }
+        {selfTextArray.length > 0 && 
+          _.map(_.slice(selfTextArray, 0, 20), (text, i) => {
+            return(
+              <Series.Sequence key={text} durationInFrames={Math.ceil(selfTextAudioDurations[i] * 30/playbackRate)}>
+                <>
+                  <SelfText playbackRate={playbackRate} wordBoundaryUrl={selfTextWordBoundaryUrls[i]} />
+                  <Audio src={selfTextAudioUrls[i]} playbackRate={playbackRate}/>
+                </>
+              </Series.Sequence>
+            )
+          })
+        }
+        {commentArray.length > 0 &&
           _.map(commentArray, (comment, i) => {
             return _.get(comment, 'bodyArray', false)
             ? generateCommentSequence(
@@ -87,15 +112,29 @@ const FancyRedditVideo = (props) => {
               commentAudioUrls[i], commentWordBoundaryUrls[i]
             )
             : (
-              <>
-                <RedditComment comment={comment} wordBoundaryUrl={commentWordBoundaryUrls[i]} playbackRate={playbackRate}/>
-                <Audio src={commentAudioUrls[i]} playbackRate={playbackRate}/>
-              </>
+            <Series.Sequence durationInFrames={Math.ceil((commentAudioDurations[i] + .5) * 30/playbackRate)} name={comment.id}>
+              <RedditComment
+                isAnimated
+                comment={comment}
+                playbackRate={playbackRate}
+                wordBoundaryUrl={commentWordBoundaryUrls[i]}
+                duration={Math.ceil(commentAudioDurations[i] * 30/playbackRate)}
+              />
+              <Audio src={commentAudioUrls[i]} playbackRate={playbackRate}/>
+            </Series.Sequence>
             );
           })
         }
+        {
+          redditVideo.length > 0 && 
+          <Series.Sequence durationInFrames={Math.ceil(videoDuration * 30)}>
+            <OffthreadVideo src={redditVideo} startFrom={120 * 30} style={{ zIndex: 5, height: 'fit-content', width: 'inherit', alignSelf: 'center' }}/>
+            {redditAudio.length > 0 && <Audio src={redditAudio}/>}
+          </Series.Sequence>
+        }
+      </Series>
     </AbsoluteFill>
   )
 }
 
-export default FancyRedditVideo;
+export default AnimatedRedditVideo;

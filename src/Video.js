@@ -6,14 +6,13 @@ import { useEffect, useState, useCallback } from 'react';
 import { removeUrl, findComment, convertAcronyms } from './util/utils';
 import {Composition, continueRender, getInputProps, delayRender} from 'remotion';
 import { getAudioDurationInSeconds, getVideoMetadata } from '@remotion/media-utils';
-import FancyRedditVideo from './Compositions/FancyRedditVideo';
+import AnimatedRedditVideo from './Compositions/AnimatedRedditVideo';
 
 export const RemotionVideo = () => {
 	const props = getInputProps();
 	const {
-		postId="xfcbr4",
-		commentIds="",
-		// iomnbun,ioniu74,iome917,iomf4kg,ion3nwq,iomyfh7
+		postId="xpr814",
+		commentIds="iq5hmi7,iq5fvf2,iq6lb18,iq7akku,iq683g7,iq6ld10",
 		redditVideo="",
 		redditAudio="",
 		voice="enUSMan1",
@@ -84,8 +83,15 @@ export const RemotionVideo = () => {
 	}, [handle, postId, commentIds, redditVideo, voice, getAudioUrls, getAudioDurations]);
 
 	const totalDuration = () => {
-		const selfTextPlusVideoDuration = Math.ceil((_.sum(_.get(selfText, 'selfTextAudioDurations', [1])) > 1 ? _.sum(_.get(selfText, 'selfTextAudioDurations', [1])) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
-		return Math.ceil(_.sum(_.flatten([_.get(post, 'postAudioDuration', 1), ..._.get(comments, 'commentAudioDurations', [1])])) * 30 / playbackRate + selfTextPlusVideoDuration);
+		const selfTextPlusVideoDuration = Math.ceil((_.sum(_.get(selfText, 'selfTextAudioDurations', [0])) > 1 ? _.sum(_.get(selfText, 'selfTextAudioDurations', [0])) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
+		return Math.ceil(_.sum(_.flatten([_.get(post, 'postAudioDuration', 1), ..._.get(comments, 'commentAudioDurations', [0])])) * 30 / playbackRate + selfTextPlusVideoDuration);
+	}
+	const totalAnimatedDuration = () => {
+		const selfTextPlusVideoDuration = Math.ceil((_.sum(_.get(selfText, 'selfTextAudioDurations', [0])) > 1 ? _.sum(_.get(selfText, 'selfTextAudioDurations', [1])) : 0) * 30 / playbackRate) + Math.ceil((videoDuration > 1 ? videoDuration : 0) * 30);
+		const postAudioDuration = _.get(post, 'postAudioDuration', 1) + 0.5;
+		const commentAudioDurations = _.map(_.flatten(_.get(comments, 'commentAudioDurations', [0])), duration => duration + 0.5);
+		const total = Math.ceil(_.sum(_.flatten([postAudioDuration, ...commentAudioDurations])) * 30 / playbackRate + selfTextPlusVideoDuration);
+		return total;
 	}
 
 	useEffect(() => {
@@ -114,9 +120,9 @@ export const RemotionVideo = () => {
 				}}
 			/>
 			<Composition
-				id="FancyRedditVideo"
-				component={FancyRedditVideo}
-				durationInFrames={totalDuration()}
+				id="AnimatedRedditVideo"
+				component={AnimatedRedditVideo}
+				durationInFrames={totalAnimatedDuration()}
 				fps={30}
 				width={1080}
 				height={1920}

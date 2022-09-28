@@ -1,4 +1,3 @@
-import { Paper } from '@mui/material';
 import PropTypes from 'prop-types'
 import { getSubredditIcon } from '../service/service';
 import _ from 'lodash';
@@ -145,7 +144,6 @@ const RedditPost = (props) => {
     setCommunityIcon(communityIconData);
 
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
-    console.log(data)
 
 		setWordBoundary(data);
     continueRender(handle);

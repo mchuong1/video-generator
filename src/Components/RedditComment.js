@@ -1,12 +1,14 @@
-import { Paper } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
 import { getRedditUserIcon } from '../service/service';
-import { continueRender, delayRender, Img, Sequence } from 'remotion';
-import { replaceBadWords, removeUrl } from '../util/utils';
+import {
+  continueRender, delayRender, Img, Sequence,
+  spring, useVideoConfig, useCurrentFrame, interpolate,
+} from 'remotion';
+import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -72,7 +74,10 @@ const useStyles = makeStyles(() => ({
 }));
 
 const RedditComment = (props) => {
-  const { comment, wordBoundaryUrl, playbackRate, byWord } = props;
+  const {
+    comment, wordBoundaryUrl, playbackRate,
+    isAnimated, duration
+  } = props;
   const classes = useStyles(props);
   const {
     author, created,
@@ -82,7 +87,29 @@ const RedditComment = (props) => {
   const [handle] = useState(() => delayRender());
   const [userIcon, setUserIcon] = useState('');
   const [wordBoundary, setWordBoundary] = useState([]);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const regexExp = /[!'#$%&()*+,-./:;<=>?@[\]^_`{|}~]/g;
+
+  const enter = spring({
+    frame,
+    fps,
+    config: {
+      stiffness: 1000,
+      overshootClamping: true,
+    },
+  });
+
+  const exit = spring({
+    frame: frame - duration,
+    fps,
+    config: {
+      stiffness: 600,
+      overshootClamping: true,
+    },
+  });
+
+  const enterAndExit = interpolate(enter, [0,.5], [-2000, 0], { extrapolateRight: 'clamp' }) + interpolate(exit, [0,1], [0,2000])
 
 
   const fetchData = useCallback(async() => {
@@ -94,13 +121,6 @@ const RedditComment = (props) => {
 
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
 
-		// // Adding punction values to text
-		// const punctuation = _.filter(data, d => _.replace(d.privText, /[!"'#$%&()*+,-./:;<=>?@[\]^_`{|}~][...]/g, '').length === 0);
-		// _.map(punctuation, p => {
-		// 	const index = _.indexOf(data, p)
-		// 	data[index-1].privDuration = data[index-1].privDuration + data[index].privDuration;
-		// 	data[index-1].privText = data[index-1].privText + data[index].privText;
-		// });
 		setWordBoundary(data);
     continueRender(handle);
   }, [handle, author, wordBoundaryUrl]);
@@ -112,7 +132,7 @@ const RedditComment = (props) => {
   
   return(
     <>
-      <Paper classes={{ root: classes.paper }}>
+      <div className={classes.paper} style={{ transform: `translateX(${isAnimated ? enterAndExit : 0}px)` }}>
         <div className={classes.header}>
           {
             userIcon !== '' &&
@@ -141,9 +161,9 @@ const RedditComment = (props) => {
                 testWord = regexExp.test(wordBoundary[i+1].privText) ? replaceBadWords(word.privText) : replaceBadWords(word.privText) + ' ';
               else
                 testWord = replaceBadWords(word.privText) + ' ';
-              if (byWord)
+              if (isAnimated)
                 return (
-                  <Sequence from={from} layout="none">
+                  <Sequence from={from} layout="none" name={testWord}>
                     <span className={classes.word}>
                       {testWord}
                     </span>
@@ -157,7 +177,7 @@ const RedditComment = (props) => {
             })
           }
         </div>
-      </Paper>
+      </div>
     </>
   )
 };
@@ -165,10 +185,12 @@ const RedditComment = (props) => {
 RedditComment.propTypes = {
   comment: PropTypes.shape({}).isRequired,
   wordBoundaryUrl: PropTypes.string.isRequired,
+  duration: PropTypes.number,
 };
 
 RedditComment.defaulProps = {
-  byWord: false,
+  isAnimated: false,
+  duration: 0,
 }
 
 export default RedditComment;

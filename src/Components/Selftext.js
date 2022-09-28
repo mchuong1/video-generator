@@ -1,8 +1,10 @@
 import _ from 'lodash';
-import { Paper } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { continueRender, delayRender, Sequence } from 'remotion';
 import { useCallback, useEffect, useState } from 'react';
+import {
+  continueRender, delayRender, Sequence,
+  spring, useVideoConfig, useCurrentFrame, interpolate,
+} from 'remotion';
 import { replaceBadWords } from '../util/utils';
 
 const useStyles = makeStyles(() => ({
@@ -24,25 +26,39 @@ const useStyles = makeStyles(() => ({
     fontWeight: 500,
     fontSize: '40px',
     lineHeight: '48px',
-    // position: 'absolute',
-    // top: '48rem',
-    // left: '5rem',
   },
-  // word: {
-  //   WebkitTextStrokeColor: 'black',
-  //   WebkitTextStrokeWidth: '5px',
-  //   fontSize: '70px',
-  //   color: 'white',
-  //   textShadow: '0px 0px 12px #000000'
-  // }
 }))
 
 const SelfText = (props) => {
-  const { wordBoundaryUrl, playbackRate } = props;
+  const {
+    wordBoundaryUrl, playbackRate,
+    isAnimated, duration
+  } = props;
   const classes = useStyles();
 
   const [handle] = useState(() => delayRender());
   const [wordBoundary, setWordBoundary] = useState([]);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const enter = spring({
+    frame,
+    fps,
+    config: {
+      stiffness: 1000,
+      overshootClamping: true,
+    },
+  });
+
+  const exit = spring({
+    frame: frame - duration,
+    fps,
+    config: {
+      stiffness: 600,
+      overshootClamping: true,
+    },
+  });
+
+  const enterAndExit = interpolate(enter, [0,.5], [-2000, 0], { extrapolateRight: 'clamp' }) + interpolate(exit, [0,1], [0,2000])
 
   const fetchData = useCallback(async () => {
     const data = await fetch(wordBoundaryUrl).then(response => response.json());
@@ -65,7 +81,7 @@ const SelfText = (props) => {
   }, [fetchData])
 
   return(
-    <Paper classes={{ root: classes.paper }}>
+    <div className={classes.paper} style={{ transform: `translateX(${isAnimated ? enterAndExit : 0}px)` }}>
       <div className={classes.body}>
         {
           _.map(wordBoundary, (word) => {
@@ -79,7 +95,7 @@ const SelfText = (props) => {
           )})
         }
       </div>
-    </Paper>
+    </div>
   )
 }
 
